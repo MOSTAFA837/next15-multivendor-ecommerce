@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { currentUser } from "@/lib/use-current-user";
+import Sidebar from "@/components/dashboard/sidebar";
 
 export default async function AdminDashboardLayout({
   children,
@@ -13,6 +14,8 @@ export default async function AdminDashboardLayout({
 
   return (
     <div className="w-full h-full">
+      <Sidebar isAdmin />
+
       <div className="ml-[300px]">
         <div className="w-full mt-[75px] p-4">{children}</div>
       </div>
