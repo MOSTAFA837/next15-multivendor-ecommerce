@@ -4,7 +4,7 @@
 import { FC, useEffect } from "react";
 
 // Prisma model
-import { Category } from "@prisma/client";
+import { Category, SubCategory } from "@prisma/client";
 
 // Form handling utilities
 import * as z from "zod";
@@ -12,7 +12,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 // Schema
-import { CategoryFormSchema } from "@/lib/schemas";
+import { SubCategoryFormSchema } from "@/lib/schemas";
 
 // UI Components
 import { AlertDialog } from "@/components/ui/alert-dialog";
@@ -35,37 +35,47 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import ImageUpload from "../shared/image-upload";
 
 // Queries
-import { upsertCategory } from "@/queries/category";
+import { upsertSubCategory } from "@/queries/sub-category";
 
 // Utils
 import { v4 } from "uuid";
 import { useRouter } from "next/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
-interface CategoryDetailsProps {
-  data?: Category;
-  //   cloudinary_key: string;
+interface SubCategoryDetailsProps {
+  data?: SubCategory;
+  categories: Category[];
 }
 
-const CategoryDetails: FC<CategoryDetailsProps> = ({
+const SubCategoryDetails: FC<SubCategoryDetailsProps> = ({
   data,
-  //   cloudinary_key,
+  categories,
 }) => {
   // Initializing necessary hooks
   const { toast } = useToast(); // Hook for displaying toast messages
   const router = useRouter(); // Hook for routing
 
   // Form hook for managing form state and validation
-  const form = useForm<z.infer<typeof CategoryFormSchema>>({
+  const form = useForm<z.infer<typeof SubCategoryFormSchema>>({
     mode: "onChange", // Form validation mode
-    resolver: zodResolver(CategoryFormSchema), // Resolver for form validation
+    resolver: zodResolver(SubCategoryFormSchema), // Resolver for form validation
     defaultValues: {
       // Setting default form values from data (if available)
       name: data?.name,
+      image: data?.image ? [{ url: data?.image }] : [],
       url: data?.url,
       featured: data?.featured,
+      categoryId: data?.categoryId,
     },
   });
 
@@ -95,25 +105,27 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
     if (data) {
       form.reset({
         name: data?.name,
+        image: [{ url: data?.image }],
         url: data?.url,
         featured: data?.featured,
+        categoryId: data.categoryId,
       });
     }
   }, [data, form]);
 
   // Submit handler for form submission
-  const handleSubmit = async (values: z.infer<typeof CategoryFormSchema>) => {
+  const handleSubmit = async (
+    values: z.infer<typeof SubCategoryFormSchema>
+  ) => {
     try {
-      console.log("✅ Received values from form:", values);
-      if (!values.name) {
-        console.warn("⚠️ Name is missing");
-      }
       // Upserting category data
-      const response = await upsertCategory({
+      const response = await upsertSubCategory({
         id: data?.id ? data.id : v4(),
         name: values.name,
+        image: values.image[0].url,
         url: values.url,
         featured: values.featured ?? false,
+        categoryId: values.categoryId,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -121,7 +133,7 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
       // Displaying success message
       toast({
         title: data?.id
-          ? "Category has been updated."
+          ? "SubCategory has been updated."
           : `Congratulations! '${response?.name}' is now created.`,
       });
 
@@ -129,11 +141,10 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
       if (data?.id) {
         router.refresh();
       } else {
-        router.push("/dashboard/admin/categories");
+        router.push("/dashboard/admin/sub-categories");
       }
     } catch (error: any) {
       // Handling form submission errors
-      console.log(error);
       toast({
         variant: "destructive",
         title: "Oops!",
@@ -146,11 +157,11 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
     <AlertDialog>
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Category Information</CardTitle>
+          <CardTitle>SubCategory Information</CardTitle>
           <CardDescription>
             {data?.id
-              ? `Update ${data?.name} category information.`
-              : " Lets create a category. You can edit category later from the categories table or the category page."}
+              ? `Update ${data?.name} SubCategory information.`
+              : " Lets create a subCategory. You can edit subCategory later from the subCategories table or the subCategory page."}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -160,12 +171,35 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
               className="space-y-4"
             >
               <FormField
-                // disabled={isLoading}
+                control={form.control}
+                name="image"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <ImageUpload
+                        type="profile"
+                        value={field.value.map((image) => image.url)}
+                        disabled={isLoading}
+                        onChange={(url) => field.onChange([{ url }])}
+                        onRemove={(url) =>
+                          field.onChange([
+                            ...field.value.filter(
+                              (current) => current.url !== url
+                            ),
+                          ])
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem className="flex-1">
-                    <FormLabel>Category name</FormLabel>
+                    <FormLabel>SubCategory name</FormLabel>
                     <FormControl>
                       <Input placeholder="Name" {...field} />
                     </FormControl>
@@ -174,15 +208,46 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
                 )}
               />
               <FormField
-                // disabled={isLoading}
                 control={form.control}
                 name="url"
                 render={({ field }) => (
                   <FormItem className="flex-1">
-                    <FormLabel>Category url</FormLabel>
+                    <FormLabel>SubCategory url</FormLabel>
                     <FormControl>
-                      <Input placeholder="/category-url" {...field} />
+                      <Input placeholder="/subCategory-url" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="categoryId"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>Category</FormLabel>
+                    <Select
+                      disabled={isLoading || categories.length == 0}
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue
+                            defaultValue={field.value}
+                            placeholder="Select a category"
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -201,18 +266,19 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
                     <div className="space-y-1 leading-none">
                       <FormLabel>Featured</FormLabel>
                       <FormDescription>
-                        This Category will appear on the home page
+                        This SubCategory will appear on the home page
                       </FormDescription>
                     </div>
                   </FormItem>
                 )}
               />
+
               <Button type="submit" disabled={isLoading}>
                 {isLoading
                   ? "loading..."
                   : data?.id
-                  ? "Save category information"
-                  : "Create category"}
+                  ? "Save SubCategory information"
+                  : "Create SubCategory"}
               </Button>
             </form>
           </Form>
@@ -222,4 +288,4 @@ const CategoryDetails: FC<CategoryDetailsProps> = ({
   );
 };
 
-export default CategoryDetails;
+export default SubCategoryDetails;

@@ -1,13 +1,13 @@
 "use client";
 
 // React, Next.js imports
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 // Custom components
-import CategoryDetails from "@/components/dashboard/forms/category-details";
 import CustomModal from "@/components/dashboard/shared/custom-modal";
+import SubCategoryDetails from "@/components/dashboard/forms/sub-category-details";
 
 // UI components
 import {
@@ -45,7 +45,8 @@ import {
 } from "lucide-react";
 
 // Queries
-import { deleteCategory, getCategory } from "@/queries/category";
+import { getAllCategories } from "@/queries/category";
+import { deleteSubCategory, getSubCategory } from "@/queries/sub-category";
 
 // Tanstack React Table
 import { ColumnDef } from "@tanstack/react-table";
@@ -53,13 +54,33 @@ import { ColumnDef } from "@tanstack/react-table";
 // Prisma models
 import { Category } from "@prisma/client";
 
-export const columns: ColumnDef<Category>[] = [
+// Types
+import { SubCategoryWithCategoryType } from "@/lib/types";
+
+export const columns: ColumnDef<SubCategoryWithCategoryType>[] = [
+  {
+    accessorKey: "image",
+    header: "",
+    cell: ({ row }) => {
+      return (
+        <div className="relative h-44 min-w-64 flex items-center rounded-xl ml-2 overflow-hidden">
+          <Image
+            src={row.original.image}
+            alt=""
+            width={1000}
+            height={1000}
+            className="w-32 h-32 object-contain shadow-2xl"
+          />
+        </div>
+      );
+    },
+  },
   {
     accessorKey: "name",
     header: "Name",
     cell: ({ row }) => {
       return (
-        <span className="font-extrabold text-lg capitalize ml-2">
+        <span className="font-extrabold text-lg capitalize">
           {row.original.name}
         </span>
       );
@@ -71,6 +92,13 @@ export const columns: ColumnDef<Category>[] = [
     header: "URL",
     cell: ({ row }) => {
       return <span>/{row.original.url}</span>;
+    },
+  },
+  {
+    accessorKey: "category",
+    header: "Category",
+    cell: ({ row }) => {
+      return <span>{row.original.category.name}</span>;
     },
   },
   {
@@ -100,18 +128,27 @@ export const columns: ColumnDef<Category>[] = [
 
 // Define props interface for CellActions component
 interface CellActionsProps {
-  rowData: Category;
+  rowData: SubCategoryWithCategoryType;
 }
 
 // CellActions component definition
 const CellActions: React.FC<CellActionsProps> = ({ rowData }) => {
-  // Hooks
+  // Declare all hooks at the top
   const { setOpen, setClose } = useModal();
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+  const [categories, setCategories] = useState<Category[]>([]);
 
-  // Return null if rowData or rowData.id don't exist
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const categories = await getAllCategories();
+      setCategories(categories);
+    };
+    fetchCategories();
+  }, []);
+
+  // Early return only after hooks are declared
   if (!rowData || !rowData.id) return null;
 
   return (
@@ -129,14 +166,15 @@ const CellActions: React.FC<CellActionsProps> = ({ rowData }) => {
             className="flex gap-2"
             onClick={() => {
               setOpen(
-                // Custom modal component
                 <CustomModal>
-                  {/* Store details component */}
-                  <CategoryDetails data={{ ...rowData }} />
+                  <SubCategoryDetails
+                    categories={categories}
+                    data={{ ...rowData }}
+                  />
                 </CustomModal>,
                 async () => {
                   return {
-                    rowData: await getCategory(rowData?.id),
+                    rowData: await getSubCategory(rowData?.id),
                   };
                 }
               );
@@ -148,7 +186,7 @@ const CellActions: React.FC<CellActionsProps> = ({ rowData }) => {
           <DropdownMenuSeparator />
           <AlertDialogTrigger asChild>
             <DropdownMenuItem className="flex gap-2" onClick={() => {}}>
-              <Trash size={15} /> Delete category
+              <Trash size={15} /> Delete subCategory
             </DropdownMenuItem>
           </AlertDialogTrigger>
         </DropdownMenuContent>
@@ -160,7 +198,7 @@ const CellActions: React.FC<CellActionsProps> = ({ rowData }) => {
           </AlertDialogTitle>
           <AlertDialogDescription className="text-left">
             This action cannot be undone. This will permanently delete the
-            category and related data.
+            subCategory and related data.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="flex items-center">
@@ -170,10 +208,10 @@ const CellActions: React.FC<CellActionsProps> = ({ rowData }) => {
             className="bg-destructive hover:bg-destructive mb-2 text-white"
             onClick={async () => {
               setLoading(true);
-              await deleteCategory(rowData.id);
+              await deleteSubCategory(rowData.id);
               toast({
-                title: "Deleted category",
-                description: "The category has been deleted.",
+                title: "Deleted subCategory",
+                description: "The subCategory has been deleted.",
               });
               setLoading(false);
               router.refresh();

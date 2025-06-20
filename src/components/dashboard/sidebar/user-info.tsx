@@ -7,28 +7,33 @@ import { ExtendedUser } from "@/auth";
 export default function UserInfo({ user }: { user: ExtendedUser | null }) {
   const role = user?.role?.toString();
 
+  console.log(user?.image);
+
   return (
-    <div>
+    <div className="border-b-black border border-r-2 w-full">
       <div>
         <Button
           className="w-full mt-5 mb-4 flex items-center justify-between py-10"
           variant="ghost"
         >
           <div className="flex items-center text-left gap-2">
-            <Avatar className="w-16 h-16">
+            {/* <Avatar className="w-16 h-16">
               <AvatarImage
                 src={user?.image || ""}
                 alt={`${user?.name || ""} `}
               />
-              <AvatarFallback className="bg-primary text-white">
-                {user?.name}
+              <AvatarFallback className="bg-blue-500 text-white">
+                {user?.name?.charAt(0).toUpperCase() || "U"}
               </AvatarFallback>
-            </Avatar>
+            </Avatar> */}
             <div className="flex flex-col gap-y-1 truncate">
               {user?.name}
               <span className="text-muted-foreground">{user?.email}</span>
-              <span className="w-fit">
-                <Badge variant="secondary" className="capitalize">
+              <span>
+                <Badge
+                  variant="secondary"
+                  className="capitalize bg-rose-300 text-rose-900"
+                >
                   {role?.toLocaleLowerCase()} Dashboard
                 </Badge>
               </span>

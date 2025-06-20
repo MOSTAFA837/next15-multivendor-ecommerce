@@ -71,11 +71,11 @@ export default function DataTable<TData, TValue>({
   });
 
   return (
-    <>
+    <div className="ml-[300px]">
       {/* Search input and action button */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center py-4 gap-2">
-          <Search />
+      <div className="flex items-center justify-between border-b border-black mb-4 px-10">
+        <div className="flex items-center py-4 gap-2 relative">
+          <Search className="absolute left-3" />
           <Input
             placeholder={searchPlaceholder}
             value={
@@ -84,7 +84,7 @@ export default function DataTable<TData, TValue>({
             onChange={(event) =>
               table.getColumn(filterValue)?.setFilterValue(event.target.value)
             }
-            className="h-12"
+            className="h-12 pl-12 border border-black focus-within:translate-x-[-1] focus-within:translate-y-[-1] focus-within:shadow-[4px_4px_0_#000] focus-within:transition-all duration-200"
           />
         </div>
         <div className="flex gap-x-2">
@@ -118,7 +118,7 @@ export default function DataTable<TData, TValue>({
 
       {/* Table */}
 
-      <div>
+      <div className="p-10">
         <div className="border bg-background rounded-lg">
           <Table className="">
             {/* Table header */}
@@ -200,6 +200,6 @@ export default function DataTable<TData, TValue>({
           </Button>
         </div>
       </div>
-    </>
+    </div>
   );
 }
