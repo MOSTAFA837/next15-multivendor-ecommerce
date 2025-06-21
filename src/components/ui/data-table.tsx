@@ -26,11 +26,14 @@ import {
 } from "@tanstack/react-table";
 
 // Lucide icons
-import { FilePlus2, Search } from "lucide-react";
+import { FilePlus2, Menu, Search } from "lucide-react";
 
 // Modal provider hook
 import { useModal } from "@/providers/modal-provider";
 import Link from "next/link";
+import { MobileSidebar } from "../dashboard/sidebar/mobile-sidebar";
+import { adminDashboardSidebarOptions } from "@/constants/data";
+import { useState } from "react";
 
 // Props interface for the table component
 interface DataTableProps<TData, TValue> {
@@ -71,10 +74,12 @@ export default function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="ml-[300px]">
+    <div className="lg:ml-[300px]">
       {/* Search input and action button */}
-      <div className="flex items-center justify-between border-b border-black mb-4 px-10">
-        <div className="flex items-center py-4 gap-2 relative">
+      <div className="flex gap-4 items-center justify-between border-b border-black mb-4 px-10">
+        <MobileSidebar />
+
+        <div className="flex items-center py-4 gap-2 relative flex-1">
           <Search className="absolute left-3" />
           <Input
             placeholder={searchPlaceholder}
@@ -90,7 +95,7 @@ export default function DataTable<TData, TValue>({
         <div className="flex gap-x-2">
           {modalChildren && (
             <Button
-              className="flex- gap-2"
+              className="flex- gap-2 h-12 hidden lg:flex"
               onClick={() => {
                 if (modalChildren)
                   setOpen(
@@ -108,7 +113,7 @@ export default function DataTable<TData, TValue>({
           )}
           {newTabLink && (
             <Link href={newTabLink}>
-              <Button variant="outline">
+              <Button variant="outline" className="h-12">
                 <FilePlus2 className="me-1" /> Create in new page
               </Button>
             </Link>
@@ -128,7 +133,7 @@ export default function DataTable<TData, TValue>({
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => {
                       return (
-                        <TableHead key={header.id}>
+                        <TableHead key={header.id} className="px-6">
                           {header.isPlaceholder
                             ? null
                             : flexRender(
@@ -151,11 +156,12 @@ export default function DataTable<TData, TValue>({
                     <TableRow
                       key={row.id}
                       data-state={row.getIsSelected() && "selected"}
+                      className="px-4"
                     >
                       {row.getVisibleCells().map((cell) => (
                         <TableCell
                           key={cell.id}
-                          className="max-w-[400px] break-words"
+                          className="max-w-[400px] break-words px-4"
                         >
                           {flexRender(
                             cell.column.columnDef.cell,
