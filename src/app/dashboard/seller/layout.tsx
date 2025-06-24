@@ -13,9 +13,7 @@ export default async function SellerDashboardLayout({
 
   return (
     <div className="w-full h-full">
-      <div className="ml-[300px]">
-        <div className="w-full mt-[75px] p-4">{children}</div>
-      </div>
+      <div className="w-full p-4">{children}</div>
     </div>
   );
 }
