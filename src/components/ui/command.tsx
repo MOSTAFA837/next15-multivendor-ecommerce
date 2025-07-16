@@ -68,9 +68,9 @@ function CommandInput({
     <div
       data-slot="command-input-wrapper"
       className={cn(
-        "flex h-10 items-center gap-2 px-3 border rounded-md transition-all",
-        "border-black", // default
-        "focus-within:translate-x-[-1] focus-within:translate-y-[-1] focus-within:shadow-[4px_4px_0_#000] focus-within:transition-all duration-200"
+        "flex h-10 items-center gap-2 px-3 border rounded-md transition-all"
+        // "border-black" // default
+        // "focus-within:translate-x-[-1] focus-within:translate-y-[-1] focus-within:shadow-[4px_4px_0_#000] focus-within:transition-all duration-200"
       )}
     >
       <SearchIcon className="size-4 shrink-0 opacity-50" />

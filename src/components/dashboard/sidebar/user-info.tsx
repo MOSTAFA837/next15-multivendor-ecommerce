@@ -10,29 +10,20 @@ export default function UserInfo({ user }: { user: ExtendedUser | null }) {
   console.log(user?.image);
 
   return (
-    <div className="border-b-black border border-r-2 w-full">
+    <div className=" w-full">
       <div>
         <Button
-          className="w-full mt-5 mb-4 flex items-center justify-between py-10"
+          className="w-full my-5 flex items-center justify-between"
           variant="ghost"
         >
           <div className="flex items-center text-left gap-2">
-            {/* <Avatar className="w-16 h-16">
-              <AvatarImage
-                src={user?.image || ""}
-                alt={`${user?.name || ""} `}
-              />
-              <AvatarFallback className="bg-blue-500 text-white">
-                {user?.name?.charAt(0).toUpperCase() || "U"}
-              </AvatarFallback>
-            </Avatar> */}
             <div className="flex flex-col gap-y-1 truncate">
               {user?.name}
               <span className="text-muted-foreground">{user?.email}</span>
               <span>
                 <Badge
                   variant="secondary"
-                  className="capitalize bg-rose-300 text-rose-900"
+                  className="capitalize bg-blue-200 text-blue-900 border border-blue-700"
                 >
                   {role?.toLocaleLowerCase()} Dashboard
                 </Badge>

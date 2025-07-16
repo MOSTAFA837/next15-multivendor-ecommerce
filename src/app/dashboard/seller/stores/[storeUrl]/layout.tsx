@@ -2,14 +2,13 @@ import { ReactNode } from "react";
 import { redirect } from "next/navigation";
 
 // Custom UI Components
-// import Header from "@/components/dashboard/header/header";
-// import Sidebar from "@/components/dashboard/sidebar/sidebar";
+import Header from "@/components/dashboard/header/header";
+import Sidebar from "@/components/dashboard/sidebar";
 
 import { currentUser } from "@/lib/use-current-user";
 
 // DB
 import { db } from "@/lib/db";
-import { Sidebar } from "lucide-react";
 
 export default async function SellerStoreDashboardLayout({
   children,
@@ -31,9 +30,10 @@ export default async function SellerStoreDashboardLayout({
 
   return (
     <div className="h-full w-full flex">
-      {/* <Sidebar stores={stores} /> */}
-      <div className="w-full ml-[300px]">
-        {/* <Header /> */}
+      <Sidebar stores={stores} />
+
+      <div className="w-full lg:ml-[300px]">
+        <Header />
         <div className="w-full mt-[75px] p-4">{children}</div>
       </div>
     </div>
