@@ -11,6 +11,7 @@ export default async function SellerNewProductVariantPage({
   const product = await getProductMainInfo(params.productId);
 
   if (!product) return null;
+
   return (
     <div>
       <ProductDetails

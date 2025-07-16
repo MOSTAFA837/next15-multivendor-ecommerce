@@ -136,7 +136,7 @@ export const ProductFormSchema = z.object({
     })
     .min(2, { message: "Product name should be at least 2 characters long." })
     .max(200, { message: "Product name cannot exceed 200 characters." })
-    .regex(/^(?!.*(?:[-_ ]){2,})[a-zA-Z0-9_ -]+$/, {
+    .regex(/^(?!.*(?:[-_ ']){2,})[a-zA-Z0-9_ \-']+$/, {
       message:
         "Product name may only contain letters, numbers, spaces, hyphens, and underscores, without consecutive special characters.",
     }),
@@ -158,10 +158,7 @@ export const ProductFormSchema = z.object({
       message: "Product variant name should be at least 2 characters long.",
     })
     .max(100, { message: "Product variant name cannot exceed 100 characters." })
-    .regex(/^(?!.*(?:[-_ ]){2,})[a-zA-Z0-9_ -]+$/, {
-      message:
-        "Product variant name may only contain letters, numbers, spaces, hyphens, and underscores, without consecutive special characters.",
-    }),
+    .optional(),
   variantDescription: z
     .string({
       required_error: "Product variant description is mandatory.",
@@ -178,7 +175,7 @@ export const ProductFormSchema = z.object({
   images: z
     .object({ url: z.string() })
     .array()
-    .min(3, "Please upload at least 3 images for the product.")
+    .min(1, "Please upload at least 1 images for the product.")
     .max(6, "You can upload up to 6 images for the product."),
   categoryId: z
     .string({

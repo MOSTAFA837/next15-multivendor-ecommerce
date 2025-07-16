@@ -26,7 +26,9 @@ const ImagesPreviewGrid: FC<ImagesPreviewGridProps> = ({
   setColors,
 }) => {
   // Calculate the number of images
-  let imagesLength = images.length;
+  const imagesLength = images.length ?? 0;
+
+  console.log(imagesLength, "imagesLength");
 
   // Get the grid class name based on the number of images
   const GridClassName = getGridClassName(imagesLength);
@@ -51,7 +53,7 @@ const ImagesPreviewGrid: FC<ImagesPreviewGridProps> = ({
     if (imagesLength > 0) {
       fecthColors();
     }
-  }, [images]);
+  }, [images, imagesLength]);
 
   // If there are no images, display a placeholder image
   if (imagesLength === 0) {
