@@ -20,17 +20,20 @@ export type ProductWithVariantType = {
   variantName: string;
   variantDescription: string;
   images: { id?: string; url: string }[];
+  variantImage: string;
   categoryId: string;
   subCategoryId: string;
   isSale: boolean;
+  saleEndDate?: string;
   brand: string;
   sku: string;
-  colors: { color: string }[];
+  colors: { id?: string; color: string }[];
   sizes: {
+    id?: string;
     size: string;
     quantity: number;
     price: number;
-    discount: number;
+    discount?: number;
   }[];
   keywords: string[];
   createdAt: Date;

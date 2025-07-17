@@ -177,6 +177,10 @@ export const ProductFormSchema = z.object({
     .array()
     .min(1, "Please upload at least 1 images for the product.")
     .max(6, "You can upload up to 6 images for the product."),
+  variantImage: z
+    .object({ url: z.string() })
+    .array()
+    .length(1, "Choose a product variant image."),
   categoryId: z
     .string({
       required_error: "Product category ID is mandatory.",
@@ -190,6 +194,7 @@ export const ProductFormSchema = z.object({
     })
     .uuid(),
   isSale: z.boolean().default(false).optional(),
+  saleEndDate: z.string().optional(),
   brand: z
     .string({
       required_error: "Product brand is mandatory.",

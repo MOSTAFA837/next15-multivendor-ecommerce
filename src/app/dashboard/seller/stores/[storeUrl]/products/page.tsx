@@ -5,6 +5,7 @@ import DataTable from "@/components/ui/data-table";
 import { Plus } from "lucide-react";
 import ProductDetails from "@/components/dashboard/forms/product-details";
 import { columns } from "./columns";
+import { updateVariantImage } from "@/scripts/variant-image";
 
 export default async function SellerProductsPage({
   params,
@@ -17,6 +18,8 @@ export default async function SellerProductsPage({
   const categories = await getAllCategories();
 
   console.log("products", products);
+
+  await updateVariantImage();
 
   return (
     <DataTable

@@ -1,11 +1,11 @@
 "use client";
 
 // React, Next.js
-import { FC, useEffect, useMemo, useRef, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 // Prisma model
-import { Category, OfferTag, SubCategory } from "@prisma/client";
+import { Category, SubCategory } from "@prisma/client";
 
 // Form handling utilities
 import * as z from "zod";
@@ -32,6 +32,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ImageUpload from "../shared/image-upload";
@@ -60,11 +61,15 @@ import {
 } from "@/components/ui/select";
 
 // React date time picker
+import DateTimePicker from "react-datetime-picker";
 import "react-datetime-picker/dist/DateTimePicker.css";
 import "react-calendar/dist/Calendar.css";
 import "react-clock/dist/Clock.css";
+import { format } from "date-fns";
 
+// Jodit text editor
 import InputFieldset from "../shared/input-fieldset";
+import { ArrowRight, Dot } from "lucide-react";
 import { generateRandomSKU } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -99,7 +104,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
 
   // State for sizes
   const [sizes, setSizes] = useState<
-    { size: string; price: number; quantity: number; discount: number }[]
+    { size: string; price: number; quantity: number; discount?: number }[]
   >(data?.sizes || [{ size: "", quantity: 1, price: 0.01, discount: 0 }]);
 
   // Form hook for managing form state and validation
@@ -113,6 +118,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
       variantName: data?.variantName,
       variantDescription: data?.variantDescription,
       images: data?.images || [],
+      variantImage: data?.variantImage ? [{ url: data.variantImage }] : [],
       categoryId: data?.categoryId,
       subCategoryId: data?.subCategoryId,
       brand: data?.brand,
@@ -121,7 +127,22 @@ const ProductDetails: FC<ProductDetailsProps> = ({
       sizes: data?.sizes,
       keywords: data?.keywords,
       isSale: data?.isSale || false,
+      saleEndDate:
+        data?.saleEndDate || format(new Date(), "yyyy-MM-dd'T'HH:mm:ss"),
     },
+  });
+
+  const saleEndDate = form.getValues().saleEndDate || new Date().toISOString();
+
+  const formattedDate = new Date(saleEndDate).toLocaleString("en-Us", {
+    weekday: "short", // Abbreviated day name (e.g., "Mon")
+    month: "long", // Abbreviated month name (e.g., "Nov")
+    day: "2-digit", // Two-digit day (e.g., "25")
+    year: "numeric", // Full year (e.g., "2024")
+    hour: "2-digit", // Two-digit hour (e.g., "02")
+    minute: "2-digit", // Two-digit minute (e.g., "30")
+    second: "2-digit", // Two-digit second (optional)
+    hour12: false, // 12-hour format (change to false for 24-hour format)
   });
 
   // UseEffect to get subCategories when user pick/change a category
@@ -142,7 +163,10 @@ const ProductDetails: FC<ProductDetailsProps> = ({
   // Reset form values when data changes
   useEffect(() => {
     if (data) {
-      form.reset(data);
+      form.reset({
+        ...data,
+        variantImage: data.variantImage ? [{ url: data.variantImage }] : [],
+      });
     }
   }, [data, form]);
 
@@ -159,16 +183,15 @@ const ProductDetails: FC<ProductDetailsProps> = ({
           variantName: values.variantName || "",
           variantDescription: values.variantDescription || "",
           images: values.images,
+          variantImage: values.variantImage[0].url,
           categoryId: values.categoryId,
           subCategoryId: values.subCategoryId,
           isSale: values.isSale || false,
+          saleEndDate: values.saleEndDate,
           brand: values.brand,
           sku: values.sku,
           colors: values.colors,
-          sizes: values.sizes.map((s) => ({
-            ...s,
-            discount: s.discount ?? 0,
-          })),
+          sizes: values.sizes,
           keywords: values.keywords,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -222,7 +245,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
     form.setValue("colors", colors);
     form.setValue("sizes", sizes);
     form.setValue("keywords", keywords);
-  }, [colors, sizes, keywords, data, form]);
+  }, [colors, sizes, keywords, form]);
 
   return (
     <AlertDialog>
@@ -254,9 +277,9 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                   render={({ field }) => (
                     <FormItem className="w-full xl:border-r">
                       <FormControl>
-                        <div>
+                        <>
                           <ImagesPreviewGrid
-                            images={form.getValues().images || []}
+                            images={form.getValues().images}
                             onRemove={(url) => {
                               const updatedImages = images.filter(
                                 (img) => img.url !== url
@@ -287,7 +310,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                               ])
                             }
                           />
-                        </div>
+                        </>
                       </FormControl>
                     </FormItem>
                   )}
@@ -490,6 +513,34 @@ const ProductDetails: FC<ProductDetailsProps> = ({
               {/* Keywords*/}
               <div className="flex items-center gap-10 py-14">
                 {/* Variant image - Keywords*/}
+                <div className="border-r pr-10">
+                  <FormField
+                    control={form.control}
+                    name="variantImage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="ml-14">Variant Image</FormLabel>
+                        <FormControl>
+                          <ImageUpload
+                            dontShowPreview
+                            type="profile"
+                            value={field.value.map((image) => image.url)}
+                            onChange={(url) => field.onChange([{ url }])}
+                            onRemove={(url) =>
+                              field.onChange([
+                                ...field.value.filter(
+                                  (current) => current.url !== url
+                                ),
+                              ])
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage className="!mt-4" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <div className="w-full flex-1 space-y-3">
                   <FormField
                     control={form.control}
@@ -552,6 +603,98 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                   )}
                 </div>
               </InputFieldset>
+
+              {/* Product and variant specs*/}
+
+              {/* Questions*/}
+
+              {/* Is On Sale */}
+              <InputFieldset
+                label="Sale"
+                description="Is your product on sale ?"
+              >
+                <div>
+                  <label
+                    htmlFor="yes"
+                    className="ml-5 flex items-center gap-x-2 cursor-pointer"
+                  >
+                    <FormField
+                      control={form.control}
+                      name="isSale"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <>
+                              <input
+                                type="checkbox"
+                                id="yes"
+                                checked={field.value}
+                                onChange={field.onChange}
+                                hidden
+                              />
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </>
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <span>Yes</span>
+                  </label>
+
+                  {form.getValues().isSale && (
+                    <div className="mt-5">
+                      <p className="text-sm text-main-secondary dark:text-gray-400 pb-3 flex">
+                        <Dot className="-me-1" />
+                        When sale does end ?
+                      </p>
+                      <div className="flex items-center gap-x-5">
+                        <FormField
+                          control={form.control}
+                          name="saleEndDate"
+                          render={({ field }) => (
+                            <FormItem className="ml-4">
+                              <FormControl>
+                                <DateTimePicker
+                                  className="inline-flex items-center gap-2 p-2 border rounded-md shadow-sm"
+                                  calendarIcon={
+                                    <span className="text-gray-500 hover:text-gray-600">
+                                      📅
+                                    </span>
+                                  }
+                                  clearIcon={
+                                    <span className="text-gray-500 hover:text-gray-600">
+                                      ✖️
+                                    </span>
+                                  }
+                                  onChange={(date) => {
+                                    field.onChange(
+                                      date
+                                        ? format(date, "yyyy-MM-dd'T'HH:mm:ss")
+                                        : ""
+                                    );
+                                  }}
+                                  value={
+                                    field.value ? new Date(field.value) : null
+                                  }
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        <ArrowRight className="w-4 text-[#1087ff]" />
+                        <span>{formattedDate}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </InputFieldset>
+
+              {/* Shipping fee method */}
+
+              {/* Fee Shipping */}
 
               <Button type="submit" disabled={isLoading}>
                 {isLoading

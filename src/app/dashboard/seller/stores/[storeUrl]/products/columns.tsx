@@ -48,60 +48,67 @@ export const columns: ColumnDef<StoreProductType>[] = [
     accessorKey: "image",
     header: "",
     cell: ({ row }) => {
+      const product = row.original;
+
       return (
-        <div className="flex flex-col gap-y-3">
+        <div className="flex flex-col gap-y-4">
           {/* Product name */}
-          <h1 className="font-bold truncate pb-3 border-b capitalize">
-            {row.original.name}
+          <h1 className="font-semibold text-lg truncate pb-2 border-b capitalize">
+            {product.name}
           </h1>
-          {/* Product variants */}
-          <div className="relative flex flex-wrap gap-2">
-            {row.original.variants.map((variant) => (
-              <div key={variant.id} className="flex flex-col gap-y-2 group">
-                <div className="relative cursor-pointer p-2">
+
+          {/* Variants Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {product.variants.map((variant) => (
+              <div
+                key={variant.id}
+                className="relative group border rounded-lg shadow-sm overflow-hidden p-2"
+              >
+                {/* Image + hover edit link */}
+                <div className="relative">
                   <Image
-                    src={variant.images[0].url}
+                    src={variant.images[0]?.url}
                     alt={`${variant.variantName} image`}
                     width={1000}
                     height={1000}
-                    className="max-w-72 h-72 rounded-md object-cover shadow-sm"
+                    className="w-full h-48 object-cover rounded-md"
                   />
                   <Link
-                    href={`/dashboard/seller/stores/${row.original.store.url}/products/${row.original.id}/variants/${variant.id}`}
+                    href={`/dashboard/seller/stores/${product.store.url}/products/${product.id}/variants/${variant.id}`}
+                    className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
                   >
-                    <div className="w-[304px] h-full absolute top-0 left-0 bottom-0 right-0 z-0 rounded-sm bg-black/50 transition-all duration-150 hidden group-hover:block">
-                      <FilePenLine className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white" />
-                    </div>
+                    <FilePenLine className="text-white w-6 h-6" />
                   </Link>
-                  {/* Info */}
-                  <div className="flex mt-2 gap-2 p-1">
-                    {/* Colors */}
-                    <div className="w-7 flex flex-col gap-2 rounded-md">
-                      {variant.colors.map((color) => (
-                        <span
-                          key={color.name}
-                          className="w-5 h-5 rounded-full shadow-2xl"
-                          style={{ backgroundColor: color.name }}
-                        />
-                      ))}
-                    </div>
-                    <div>
-                      {/* Name of variant */}
-                      <h1 className="max-w-40 capitalize text-sm">
-                        {variant.variantName}
-                      </h1>
-                      {/* Sizes */}
-                      <div className="flex flex-wrap gap-2 max-w-72 mt-1">
-                        {variant.sizes.map((size) => (
-                          <span
-                            key={size.size}
-                            className="w-fit p-1 rounded-md text-[11px] font-medium border-2 bg-white/10"
-                          >
-                            {size.size} - ({size.quantity}) - {size.price}$
-                          </span>
-                        ))}
-                      </div>
-                    </div>
+                </div>
+
+                {/* Variant Info */}
+                <div className="mt-3 space-y-2">
+                  {/* Variant Name */}
+                  <h2 className="text-sm font-medium capitalize truncate">
+                    {variant.variantName}
+                  </h2>
+
+                  {/* Colors */}
+                  <div className="flex gap-1 items-center">
+                    {variant.colors.map((color) => (
+                      <span
+                        key={color.name}
+                        className="w-4 h-4 rounded-full border"
+                        style={{ backgroundColor: color.name }}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Sizes */}
+                  <div className="flex flex-wrap gap-1">
+                    {variant.sizes.map((size) => (
+                      <span
+                        key={size.size}
+                        className="text-xs px-2 py-0.5 border rounded-md bg-muted text-muted-foreground"
+                      >
+                        {size.size} ({size.quantity}) - ${size.price}
+                      </span>
+                    ))}
                   </div>
                 </div>
               </div>
