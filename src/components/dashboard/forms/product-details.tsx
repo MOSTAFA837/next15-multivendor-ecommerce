@@ -1,7 +1,7 @@
 "use client";
 
 // React, Next.js
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 // Prisma model
@@ -73,6 +73,10 @@ import { ArrowRight, Dot } from "lucide-react";
 import { generateRandomSKU } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import JoditEditor from "jodit-react";
+
 interface ProductDetailsProps {
   data?: Partial<ProductWithVariantType>;
   categories: Category[];
@@ -87,6 +91,10 @@ const ProductDetails: FC<ProductDetailsProps> = ({
   // Initializing necessary hooks
   const { toast } = useToast(); // Hook for displaying toast messages
   const router = useRouter(); // Hook for routing
+
+  // Jodit editor refs
+  const productDescEditor = useRef(null);
+  const variantDescEditor = useRef(null);
 
   // Is new variant page
   const isNewVariantPage = data?.productId && !data?.variantId;
@@ -365,39 +373,55 @@ const ProductDetails: FC<ProductDetailsProps> = ({
               </InputFieldset>
 
               {/* Description */}
-              <InputFieldset label="Description">
-                <div className="flex flex-col lg:flex-row gap-4">
-                  {!isNewVariantPage && (
-                    <FormField
-                      control={form.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem className="flex-1">
-                          <FormLabel>Product description</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder="Description" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
+              <Tabs defaultValue="product" className="w-full">
+                <TabsList className="w-full grid grid-cols-2">
+                  <TabsTrigger value="product">Product description</TabsTrigger>
+                  <TabsTrigger value="variant">Variant description</TabsTrigger>
+                </TabsList>
 
+                <TabsContent value="product">
                   <FormField
+                    disabled={isLoading}
                     control={form.control}
-                    name="variantDescription"
+                    name="description"
                     render={({ field }) => (
                       <FormItem className="flex-1">
-                        <FormLabel>Variant description</FormLabel>
                         <FormControl>
-                          <Textarea placeholder="Description" {...field} />
+                          <JoditEditor
+                            ref={productDescEditor}
+                            value={form.getValues().description}
+                            onChange={(content) => {
+                              form.setValue("description", content);
+                            }}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                </div>
-              </InputFieldset>
+                </TabsContent>
+                <TabsContent value="variant">
+                  <FormField
+                    disabled={isLoading}
+                    control={form.control}
+                    name="variantDescription"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <JoditEditor
+                            ref={variantDescEditor}
+                            value={form.getValues().variantDescription}
+                            onChange={(content) => {
+                              form.setValue("description", content);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+              </Tabs>
 
               {/* Category - SubCategory - offer*/}
               {!isNewVariantPage && (
