@@ -254,4 +254,60 @@ export const ProductFormSchema = z.object({
         message: "All size inputs must be filled correctly.",
       }
     ),
+  product_specs: z
+    .object({
+      name: z.string(),
+      value: z.string(),
+    })
+    .array()
+    .min(1, "Please provide at least one product spec.")
+    .refine(
+      (product_specs) =>
+        product_specs.every(
+          (spec) => spec.name.length > 0 && spec.value.length > 0
+        ),
+      {
+        message: "All product spec inputs must be filled correctly.",
+      }
+    ),
+  variant_specs: z
+    .object({
+      name: z.string(),
+      value: z.string(),
+    })
+    .array()
+    .min(1, "Please provide at least one product variant spec.")
+    .refine(
+      (product_specs) =>
+        product_specs.every(
+          (spec) => spec.name.length > 0 && spec.value.length > 0
+        ),
+      {
+        message: "All product variant specs inputs must be filled correctly.",
+      }
+    ),
+  questions: z
+    .object({
+      question: z.string(),
+      answer: z.string(),
+    })
+    .array()
+    .min(1, "Please provide at least one product question.")
+    .refine(
+      (questions) =>
+        questions.every((q) => q.question.length > 0 && q.answer.length > 0),
+      {
+        message: "All product question inputs must be filled correctly.",
+      }
+    ),
+  offerTagId: z
+    .string({
+      required_error: "Product offer tag ID is mandatory.",
+      invalid_type_error: "Product offer tag ID must be a valid UUID.",
+    })
+    .uuid()
+    .optional(),
+  weight: z.number().min(0.01, {
+    message: "Please provide a valid product weight.",
+  }),
 });

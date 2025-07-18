@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 import ProductDetails from "@/components/dashboard/forms/product-details";
 import { columns } from "./columns";
 import { updateVariantImage } from "@/scripts/variant-image";
+import { getAllOfferTags } from "@/queries/offer-tag";
 
 export default async function SellerProductsPage({
   params,
@@ -16,10 +17,7 @@ export default async function SellerProductsPage({
   const products = await getAllStoreProducts(params.storeUrl);
 
   const categories = await getAllCategories();
-
-  console.log("products", products);
-
-  await updateVariantImage();
+  const offerTags = await getAllOfferTags();
 
   return (
     <DataTable
@@ -33,6 +31,7 @@ export default async function SellerProductsPage({
         <ProductDetails
           categories={categories || []}
           storeUrl={params.storeUrl}
+          offerTags={offerTags || []}
         />
       }
       newTabLink={`/dashboard/seller/stores/${params.storeUrl}/products/new`}

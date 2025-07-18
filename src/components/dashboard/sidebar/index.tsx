@@ -28,9 +28,6 @@ const Sidebar: FC<SidebarProps> = async ({ isAdmin, stores }) => {
 
   return (
     <div className="border-gray-200 border-r-2 pt-9 w-[300px] justify-between hidden h-full lg:flex flex-col fixed top-0 left-0 bottom-0">
-      {/* <Logo width="100%" height="140px" /> */}
-      {/* <span className="mt-3" /> */}
-
       {user && <UserInfo user={user} />}
 
       {!isAdmin && stores && <StoreSwitcher stores={stores} />}

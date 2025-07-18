@@ -36,6 +36,11 @@ export type ProductWithVariantType = {
     discount?: number;
   }[];
   keywords: string[];
+  product_specs: { id?: string; name: string; value: string }[];
+  variant_specs: { id?: string; name: string; value: string }[];
+  questions: { id?: string; question: string; answer: string }[];
+  offerTagId: string;
+  weight: number;
   createdAt: Date;
   updatedAt: Date;
 };

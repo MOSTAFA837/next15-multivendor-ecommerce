@@ -26,9 +26,7 @@ const ImagesPreviewGrid: FC<ImagesPreviewGridProps> = ({
   setColors,
 }) => {
   // Calculate the number of images
-  const imagesLength = images.length ?? 0;
-
-  console.log(imagesLength, "imagesLength");
+  const imagesLength = images.length || 0;
 
   // Get the grid class name based on the number of images
   const GridClassName = getGridClassName(imagesLength);

@@ -31,7 +31,13 @@ import { useModal } from "@/providers/modal-provider";
 import { useToast } from "@/hooks/use-toast";
 
 // Lucide icons
-import { CopyPlus, FilePenLine, MoreHorizontal, Trash } from "lucide-react";
+import {
+  CopyPlus,
+  FilePenLine,
+  MoreHorizontal,
+  Store,
+  Trash,
+} from "lucide-react";
 
 // Queries
 import { deleteProduct } from "@/queries/product";
@@ -67,7 +73,7 @@ export const columns: ColumnDef<StoreProductType>[] = [
                 {/* Image + hover edit link */}
                 <div className="relative">
                   <Image
-                    src={variant.images[0]?.url}
+                    src={variant.variantImage || variant.images[0]?.url}
                     alt={`${variant.variantName} image`}
                     width={1000}
                     height={1000}

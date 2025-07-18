@@ -34,7 +34,7 @@ export default async function SellerStoreDashboardLayout({
 
       <div className="w-full lg:ml-[300px]">
         <Header />
-        <div className="w-full mt-[75px] p-4">{children}</div>
+        <div className="w-full p-4">{children}</div>
       </div>
     </div>
   );
