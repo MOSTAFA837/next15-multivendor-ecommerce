@@ -6,25 +6,33 @@ export default function InputFieldset({
   label,
   description,
   children,
+  icon,
 }: {
   label: string;
   description?: string;
   children: ReactNode;
+  icon?: React.ReactNode;
 }) {
   return (
-    <div>
-      <fieldset className="border rounded-md p-4">
-        <legend className="px-2">
-          <FormLabel>{label}</FormLabel>
-        </legend>
-        {description && (
-          <p className="text-sm text-main-secondary dark:text-gray-400 pb-3 flex">
-            <Dot className="-me-1" />
-            {description}
-          </p>
-        )}
-        {children}
-      </fieldset>
+    <div
+      className={`bg-form rounded-xl border border-form-border shadow-sm transition-all duration-200 hover:shadow-md`}
+    >
+      <div className="p-6 border-b border-form-border bg-gradient-to-r from-form-accent to-transparent">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-lg text-primary">
+            {icon}
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg text-foreground">{label}</h3>
+            {description && (
+              <p className="text-sm text-muted-foreground mt-1">
+                {description}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="p-6">{children}</div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { getAllStoreProducts } from "@/queries/product";
+import { getStoreDefaultShippingDetails } from "@/queries/store";
 import { getAllSubCategories } from "@/queries/sub-category";
-import { Prisma } from "@prisma/client";
+import { Prisma, ShippingRate } from "@prisma/client";
 
 export interface DashboardSidebarMenuInterface {
   label: string;
@@ -40,7 +41,7 @@ export type ProductWithVariantType = {
   variant_specs: { id?: string; name: string; value: string }[];
   questions: { id?: string; question: string; answer: string }[];
   offerTagId: string;
-  weight: number;
+  weight: number | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -48,3 +49,42 @@ export type ProductWithVariantType = {
 export type StoreProductType = Prisma.PromiseReturnType<
   typeof getAllStoreProducts
 >[0];
+
+export type StoreShippingType = Prisma.PromiseReturnType<
+  typeof getStoreDefaultShippingDetails
+>;
+
+export type CountryWithShippingRatesType = {
+  countryId: string;
+  countryName: string;
+  shippingRate: ShippingRate;
+};
+
+export type StoreDefaultShippingType = Prisma.PromiseReturnType<
+  typeof getStoreDefaultShippingDetails
+>;
+
+export enum StoreStatus {
+  PENDING = "PENDING",
+  ACTIVE = "ACTIVE",
+  BANNED = "BANNED",
+  DISABLED = "DISABLED",
+}
+
+export type StoreType = {
+  name: string;
+  description: string;
+  email: string;
+  phone: string;
+  logo: string;
+  cover: string;
+  url: string;
+  defaultShippingService: string;
+  defaultDeliveryTimeMax?: number;
+  defaultDeliveryTimeMin?: number;
+  defaultShippingFeeFixed?: number;
+  defaultShippingFeeForAdditionalItem?: number;
+  defaultShippingFeePerItem?: number;
+  defaultShippingFeePerKg?: number;
+  returnPolicy?: string;
+};

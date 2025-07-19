@@ -223,8 +223,8 @@ export const ProductFormSchema = z.object({
       invalid_type_error: "Keywords must be valid strings.",
     })
     .array()
-    .min(5, {
-      message: "Please provide at least 5 keywords.",
+    .min(1, {
+      message: "Please provide at least 1 keyword.",
     })
     .max(10, {
       message: "You can provide up to 10 keywords.",
@@ -307,7 +307,43 @@ export const ProductFormSchema = z.object({
     })
     .uuid()
     .optional(),
-  weight: z.number().min(0.01, {
-    message: "Please provide a valid product weight.",
-  }),
+  weight: z.number().optional().nullable(),
+});
+
+// Store shipping details
+export const StoreShippingFormSchema = z.object({
+  defaultShippingService: z
+    .string({
+      required_error: "Shipping service name is required.",
+    })
+    .min(2, "Shipping service name must be at least 2 characters long.")
+    .max(50, { message: "Shipping service name cannot exceed 50 characters." }),
+  defaultShippingFeePerItem: z.number(),
+  defaultShippingFeeForAdditionalItem: z.number(),
+  defaultShippingFeePerKg: z.number(),
+  defaultShippingFeeFixed: z.number(),
+  defaultDeliveryTimeMin: z.number(),
+  defaultDeliveryTimeMax: z.number(),
+  returnPolicy: z.string(),
+});
+
+export const ShippingRateFormSchema = z.object({
+  shippingService: z
+    .string({
+      required_error: "Shipping service name is required.",
+      invalid_type_error: "Shipping service name must be a string.",
+    })
+    .min(2, {
+      message: "Shipping service name must be at least 2 characters long.",
+    })
+    .max(50, { message: "Shipping service name cannot exceed 50 characters." }),
+  countryId: z.string().uuid().optional(),
+  countryName: z.string().optional(),
+  shippingFeePerItem: z.number(),
+  shippingFeeForAdditionalItem: z.number(),
+  shippingFeePerKg: z.number(),
+  shippingFeeFixed: z.number(),
+  deliveryTimeMin: z.number(),
+  deliveryTimeMax: z.number(),
+  returnPolicy: z.string().min(1, "Return policy is required."),
 });

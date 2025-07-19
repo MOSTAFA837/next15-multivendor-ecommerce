@@ -1,5 +1,4 @@
 import ProductDetails from "@/components/dashboard/forms/product-details";
-import { db } from "@/lib/db";
 
 // Queries
 import { getAllCategories } from "@/queries/category";
@@ -13,25 +12,29 @@ export default async function ProductVariantPage({
 }) {
   const categories = await getAllCategories();
   const offerTags = await getAllOfferTags();
-
   const { productId, variantId, storeUrl } = params;
-
   const productDetails = await getProductVariant(productId, variantId);
   if (!productDetails) return;
-  const newDetails = {
-    ...ProductDetails,
-    variantDescription: productDetails.variantDescription ?? undefined,
-  };
 
-  if (!categories) return null;
+  console.log(productDetails);
+
+  const newDetails = {
+    ...productDetails,
+    variantName: productDetails.variantName ?? "",
+    variantDescription: productDetails.variantDescription ?? "",
+    variantImage: productDetails.variantImage ?? "",
+    colors: productDetails.colors.map((c) => ({
+      color: c.name,
+    })),
+  };
 
   return (
     <div>
       <ProductDetails
         categories={categories}
+        offerTags={offerTags}
         storeUrl={storeUrl}
         data={newDetails}
-        offerTags={offerTags}
       />
     </div>
   );

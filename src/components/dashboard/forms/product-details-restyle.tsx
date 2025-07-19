@@ -76,6 +76,7 @@ import {
   HelpCircle,
   ImageIcon,
   Package2,
+  Palette,
   Scale,
   Settings,
   Tag,
@@ -87,8 +88,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import JoditEditor from "jodit-react";
 import { NumberInput } from "@tremor/react";
+import { Separator } from "@radix-ui/react-dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import InputFieldset from "../shared/input-fieldset";
 
 interface ProductDetailsProps {
   data?: Partial<ProductWithVariantType>;
@@ -103,7 +104,6 @@ const ProductDetails: FC<ProductDetailsProps> = ({
   storeUrl,
   offerTags,
 }) => {
-  console.log(data?.colors, "colors");
   // Initializing necessary hooks
   const { toast } = useToast(); // Hook for displaying toast messages
   const router = useRouter(); // Hook for routing
@@ -240,7 +240,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({
           variant_specs: values.variant_specs,
           questions: values.questions,
           offerTagId: values.offerTagId || "",
-          weight: values.weight || null,
+          weight: values.weight,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -298,13 +298,61 @@ const ProductDetails: FC<ProductDetailsProps> = ({
     form.setValue("questions", questions);
   }, [colors, sizes, keywords, form, productSpecs, variantSpecs, questions]);
 
+  const FormSection: React.FC<{
+    icon: React.ReactNode;
+    title: string;
+    description?: string;
+    children: React.ReactNode;
+    className?: string;
+  }> = ({ icon, title, description, children, className = "" }) => (
+    <div
+      className={`bg-form rounded-xl border border-form-border shadow-sm transition-all duration-200 hover:shadow-md ${className}`}
+    >
+      <div className="p-6 border-b border-form-border bg-gradient-to-r from-form-accent to-transparent">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-lg text-primary">
+            {icon}
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg text-foreground">{title}</h3>
+            {description && (
+              <p className="text-sm text-muted-foreground mt-1">
+                {description}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="p-6">{children}</div>
+    </div>
+  );
+
+  const KeywordTag: React.FC<{ keyword: string; onRemove: () => void }> = ({
+    keyword,
+    onRemove,
+  }) => (
+    <Badge
+      variant="secondary"
+      className="gap-2 py-1 px-3 bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+    >
+      {keyword}
+      <button
+        type="button"
+        onClick={onRemove}
+        className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+      >
+        <X className="h-3 w-3" />
+      </button>
+    </Badge>
+  );
+
   return (
     <AlertDialog>
       <div className="min-h-screen bg-gradient-to-br from-form-accent via-background to-form p-6 w-full">
         <div className="mx-auto">
           <Card className="border-0 shadow-2xl bg-card/95 backdrop-blur-sm">
             <CardHeader className="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border-b">
-              <div className="flex items-center gap-4 p-2">
+              <div className="flex items-center gap-4 p-4">
                 <div className="p-3 bg-primary rounded-xl">
                   <Package2 className="h-6 w-6 text-primary-foreground" />
                 </div>
@@ -323,47 +371,50 @@ const ProductDetails: FC<ProductDetailsProps> = ({
               </div>
             </CardHeader>
 
-            <CardContent className="p-4">
+            <CardContent className="p-8">
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(handleSubmit)}
-                  className="space-y-4"
+                  className="space-y-8"
                 >
-                  {/* Images - Colors */}
-                  <div
-                    className={`bg-form rounded-xl border border-form-border shadow-sm transition-all duration-200 hover:shadow-md`}
+                  {/* Images & Colors Section */}
+                  <FormSection
+                    icon={<ImageIcon className="h-5 w-5" />}
+                    title="Product Media & Colors"
+                    description="Upload product images and define available colors"
                   >
-                    <div className="p-6 border-b border-form-border bg-gradient-to-r from-form-accent to-transparent">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-primary/10 rounded-lg text-primary">
-                          {<ImageIcon className="h-5 w-5" />}
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-lg text-foreground">
-                            Product Media & Colors
-                          </h3>
-
-                          <p className="text-sm text-muted-foreground mt-1">
-                            Upload product images and define available colors
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-6">
-                      <div className="flex flex-col gap-y-6 xl:flex-row">
+                    <div className="grid lg:grid-cols-2 gap-8">
+                      {/* Images */}
+                      <div className="space-y-4">
                         <FormField
                           control={form.control}
                           name="images"
                           render={({ field }) => (
-                            <FormItem className="w-full xl:border-r">
+                            <FormItem>
+                              <FormLabel className="text-base font-medium">
+                                Product Images
+                              </FormLabel>
                               <FormControl>
-                                <div>
+                                <div className="space-y-4">
+                                  <ImagesPreviewGrid
+                                    images={form.getValues().images || []}
+                                    onRemove={(url) => {
+                                      const updatedImages = images.filter(
+                                        (img) => img.url !== url
+                                      );
+                                      setImages(updatedImages);
+                                      field.onChange(updatedImages);
+                                    }}
+                                    colors={colors}
+                                    setColors={setColors}
+                                  />
                                   <ImageUpload
                                     dontShowPreview
                                     type="standard"
-                                    value={field.value.map(
-                                      (image) => image.url
-                                    )}
+                                    value={
+                                      field.value &&
+                                      field.value.map((image) => image.url)
+                                    }
                                     onChange={(url) => {
                                       setImages((prevImages) => {
                                         const updatedImages = [
@@ -382,58 +433,86 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                                       ])
                                     }
                                   />
-                                  <ImagesPreviewGrid
-                                    images={form.getValues().images || []}
-                                    onRemove={(url) => {
-                                      const updatedImages = images.filter(
-                                        (img) => img.url !== url
-                                      );
-                                      setImages(updatedImages);
-                                      field.onChange(updatedImages);
-                                    }}
-                                    colors={colors}
-                                    setColors={setColors}
-                                  />
-                                  <FormMessage className="!mt-4" />
                                 </div>
                               </FormControl>
+                              <FormMessage />
                             </FormItem>
                           )}
                         />
+                      </div>
 
-                        <div className="w-full flex flex-col gap-y-3 xl:pl-5">
-                          <ClickToAddInputs
-                            details={data?.colors || colors}
-                            setDetails={setColors}
-                            initialDetail={{ color: "" }}
-                            header="Colors"
-                            colorPicker
-                          />
-                          {errors.colors && (
-                            <span className="text-sm font-medium text-destructive">
-                              {errors.colors.message}
-                            </span>
-                          )}
+                      {/* Colors */}
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 mb-4">
+                          <Palette className="h-4 w-4 text-primary" />
+                          <span className="text-base font-medium">
+                            Available Colors
+                          </span>
                         </div>
+                        <ClickToAddInputs
+                          details={data?.colors || colors}
+                          setDetails={setColors}
+                          initialDetail={{ color: "" }}
+                          header="Colors"
+                          colorPicker
+                        />
+                        {errors.colors && (
+                          <p className="text-sm text-destructive">
+                            {errors.colors.message}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <FormField
+                          control={form.control}
+                          name="variantImage"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Variant Image</FormLabel>
+                              <FormControl>
+                                <ImageUpload
+                                  dontShowPreview
+                                  type="profile"
+                                  value={field.value.map((image) => image.url)}
+                                  onChange={(url) => field.onChange([{ url }])}
+                                  onRemove={(url) =>
+                                    field.onChange([
+                                      ...field.value.filter(
+                                        (current) => current.url !== url
+                                      ),
+                                    ])
+                                  }
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
                     </div>
-                  </div>
+                  </FormSection>
 
-                  {/* Name */}
-                  <InputFieldset
-                    label="Name"
-                    description="Basic product and variant information"
+                  {/* Product Names Section */}
+                  <FormSection
                     icon={<FileText className="h-5 w-5" />}
+                    title="Product Information"
+                    description="Basic product and variant information"
                   >
-                    <div className="flex flex-col lg:flex-row gap-4">
+                    <div className="grid md:grid-cols-2 gap-6">
                       {!isNewVariantPage && (
                         <FormField
                           control={form.control}
                           name="name"
                           render={({ field }) => (
-                            <FormItem className="flex-1">
+                            <FormItem>
+                              <FormLabel>Product Name</FormLabel>
                               <FormControl>
-                                <Input placeholder="Product name" {...field} />
+                                <Input
+                                  placeholder="Enter product name"
+                                  {...field}
+                                  className="h-12"
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -444,54 +523,47 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                         control={form.control}
                         name="variantName"
                         render={({ field }) => (
-                          <FormItem className="flex-1">
+                          <FormItem>
+                            <FormLabel>Variant Name</FormLabel>
                             <FormControl>
-                              <Input placeholder="Variant name" {...field} />
+                              <Input
+                                placeholder="Enter variant name"
+                                {...field}
+                                className="h-12"
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
                     </div>
-                  </InputFieldset>
 
-                  {/* Product - variant description editors (tabs) */}
-                  <InputFieldset
-                    label="Description"
-                    icon={<FileText className="h-5 w-5" />}
-                    description={
-                      isNewVariantPage
-                        ? ""
-                        : "Note: The product description is the main description for the product (Will display in every variant page). You can add an extra description specific to this variant using 'Variant description' tab."
-                    }
-                  >
-                    <Tabs
-                      defaultValue={isNewVariantPage ? "variant" : "product"}
-                      className="w-full"
-                    >
-                      {!isNewVariantPage && (
-                        <TabsList className="w-full grid grid-cols-2">
-                          <TabsTrigger value="product">
-                            Product description
-                          </TabsTrigger>
-                          <TabsTrigger value="variant">
-                            Variant description
-                          </TabsTrigger>
-                        </TabsList>
-                      )}
-                      <TabsContent value="product">
+                    <Separator className="my-6" />
+
+                    {/* Descriptions */}
+                    <Tabs defaultValue="product" className="w-full">
+                      <TabsList className="w-full h-12 bg-muted/50">
+                        <TabsTrigger value="product" className="flex-1 h-10">
+                          Product Description
+                        </TabsTrigger>
+                        <TabsTrigger value="variant" className="flex-1 h-10">
+                          Variant Description
+                        </TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value="product" className="mt-6">
                         <FormField
                           control={form.control}
                           name="description"
                           render={({ field }) => (
-                            <FormItem className="flex-1">
+                            <FormItem>
                               <FormControl>
                                 <JoditEditor
                                   ref={productDescEditor}
                                   value={form.getValues().description}
-                                  onChange={(content) => {
-                                    form.setValue("description", content);
-                                  }}
+                                  onChange={(content) =>
+                                    form.setValue("description", content)
+                                  }
                                 />
                               </FormControl>
                               <FormMessage />
@@ -499,24 +571,20 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                           )}
                         />
                       </TabsContent>
-                      <TabsContent value="variant">
+
+                      <TabsContent value="variant" className="mt-6">
                         <FormField
                           control={form.control}
                           name="variantDescription"
                           render={({ field }) => (
-                            <FormItem className="flex-1">
+                            <FormItem>
                               <FormControl>
                                 <JoditEditor
                                   ref={variantDescEditor}
-                                  value={
-                                    form.getValues().variantDescription || ""
+                                  value={form.getValues().variantDescription}
+                                  onChange={(content) =>
+                                    form.setValue("variantDescription", content)
                                   }
-                                  onChange={(content) => {
-                                    form.setValue(
-                                      "variantDescription",
-                                      content
-                                    );
-                                  }}
                                 />
                               </FormControl>
                               <FormMessage />
@@ -525,33 +593,31 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                         />
                       </TabsContent>
                     </Tabs>
-                  </InputFieldset>
+                  </FormSection>
 
-                  {/* Category - SubCategory - offer*/}
+                  {/* Category Section */}
                   {!isNewVariantPage && (
-                    <InputFieldset
-                      label="Category"
+                    <FormSection
                       icon={<Tag className="h-5 w-5" />}
+                      title="Product Categorization"
                       description="Organize your product with categories and offers"
                     >
-                      <div className="flex gap-4">
+                      <div className="grid md:grid-cols-3 gap-6">
                         <FormField
                           control={form.control}
                           name="categoryId"
                           render={({ field }) => (
-                            <FormItem className="flex-1">
+                            <FormItem>
+                              <FormLabel>Category</FormLabel>
                               <Select
-                                disabled={isLoading || categories.length == 0}
+                                disabled={isLoading || categories.length === 0}
                                 onValueChange={field.onChange}
                                 value={field.value}
                                 defaultValue={field.value}
                               >
                                 <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue
-                                      defaultValue={field.value}
-                                      placeholder="Select a category"
-                                    />
+                                  <SelectTrigger className="h-12">
+                                    <SelectValue placeholder="Select a category" />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -569,15 +635,17 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                             </FormItem>
                           )}
                         />
+
                         <FormField
                           control={form.control}
                           name="subCategoryId"
                           render={({ field }) => (
-                            <FormItem className="flex-1">
+                            <FormItem>
+                              <FormLabel>Sub-Category</FormLabel>
                               <Select
                                 disabled={
                                   isLoading ||
-                                  categories.length == 0 ||
+                                  categories.length === 0 ||
                                   !form.getValues().categoryId
                                 }
                                 onValueChange={field.onChange}
@@ -585,11 +653,8 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                                 defaultValue={field.value}
                               >
                                 <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue
-                                      defaultValue={field.value}
-                                      placeholder="Select a sub-category"
-                                    />
+                                  <SelectTrigger className="h-12">
+                                    <SelectValue placeholder="Select a sub-category" />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -604,36 +669,30 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                             </FormItem>
                           )}
                         />
-                        {/* Offer Tag */}
+
                         <FormField
                           control={form.control}
                           name="offerTagId"
                           render={({ field }) => (
-                            <FormItem className="flex-1">
+                            <FormItem>
+                              <FormLabel>Offer Tag</FormLabel>
                               <Select
-                                disabled={isLoading || categories.length == 0}
+                                disabled={isLoading || categories.length === 0}
                                 onValueChange={field.onChange}
                                 value={field.value}
                                 defaultValue={field.value}
                               >
                                 <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue
-                                      defaultValue={field.value}
-                                      placeholder="Select an offer"
-                                    />
+                                  <SelectTrigger className="h-12">
+                                    <SelectValue placeholder="Select an offer" />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  {offerTags &&
-                                    offerTags.map((offer) => (
-                                      <SelectItem
-                                        key={offer.id}
-                                        value={offer.id}
-                                      >
-                                        {offer.name}
-                                      </SelectItem>
-                                    ))}
+                                  {offerTags?.map((offer) => (
+                                    <SelectItem key={offer.id} value={offer.id}>
+                                      {offer.name}
+                                    </SelectItem>
+                                  ))}
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -641,60 +700,72 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                           )}
                         />
                       </div>
-                    </InputFieldset>
+                    </FormSection>
                   )}
 
-                  {/* Brand, Sku, Weight */}
-                  <InputFieldset
-                    label={
-                      isNewVariantPage ? "Sku, Weight" : "Brand, Sku, Weight"
-                    }
+                  {/* Product Details Section */}
+                  <FormSection
                     icon={<Settings className="h-5 w-5" />}
+                    title={
+                      isNewVariantPage
+                        ? "Product Details"
+                        : "Brand & Product Details"
+                    }
                     description="Essential product information and specifications"
                   >
-                    <div className="flex flex-col lg:flex-row gap-4">
+                    <div className="grid md:grid-cols-3 gap-6">
                       {!isNewVariantPage && (
                         <FormField
                           control={form.control}
                           name="brand"
                           render={({ field }) => (
-                            <FormItem className="flex-1">
+                            <FormItem>
                               <FormLabel>Brand</FormLabel>
                               <FormControl>
-                                <Input placeholder="Product brand" {...field} />
+                                <Input
+                                  placeholder="Enter brand name"
+                                  {...field}
+                                  className="h-12"
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
                       )}
+
                       <FormField
                         control={form.control}
                         name="sku"
                         render={({ field }) => (
-                          <FormItem className="flex-1">
+                          <FormItem>
                             <FormLabel>SKU</FormLabel>
                             <FormControl>
-                              <Input placeholder="Product sku" {...field} />
+                              <Input
+                                placeholder="Enter product SKU"
+                                {...field}
+                                className="h-12"
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
+
                       <FormField
                         control={form.control}
                         name="weight"
                         render={({ field }) => (
-                          <FormItem className="flex-1">
-                            <FormLabel>Weight</FormLabel>
+                          <FormItem>
+                            <FormLabel>Weight (kg)</FormLabel>
                             <FormControl>
                               <NumberInput
-                                defaultValue={field.value ?? undefined}
+                                defaultValue={field.value}
                                 onValueChange={field.onChange}
-                                placeholder="Product weight"
+                                placeholder="0.00"
                                 min={0.01}
                                 step={0.01}
-                                className="!shadow-none rounded-md !text-sm pl-2"
+                                className="h-12"
                               />
                             </FormControl>
                             <FormMessage />
@@ -702,269 +773,202 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                         )}
                       />
                     </div>
-                  </InputFieldset>
+                  </FormSection>
 
-                  {/* Variant image - Keywords*/}
-                  <InputFieldset
+                  {/* Variant Image & Keywords Section */}
+                  <FormSection
                     icon={<ImageIcon className="h-5 w-5" />}
-                    label="Variant Details"
+                    title="Variant Details"
                     description="Specific variant image and search keywords"
                   >
-                    <div className="flex items-center gap-10 py-14">
-                      <div className="border-r pr-10">
-                        <FormField
-                          control={form.control}
-                          name="variantImage"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="flex justify-center">
-                                Thumbnail
-                              </FormLabel>
-                              <FormControl>
-                                <ImageUpload
-                                  dontShowPreview
-                                  type="profile"
-                                  value={field.value.map((image) => image.url)}
-                                  onChange={(url) => field.onChange([{ url }])}
-                                  onRemove={(url) =>
-                                    field.onChange([
-                                      ...field.value.filter(
-                                        (current) => current.url !== url
-                                      ),
-                                    ])
-                                  }
-                                />
-                              </FormControl>
-                              <FormMessage className="!mt-4" />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <div className="w-full flex-1 space-y-3">
+                    <div className="grid lg:grid-cols-2 gap-8">
+                      <div className="space-y-4">
                         <FormField
                           control={form.control}
                           name="keywords"
                           render={({ field }) => (
-                            <FormItem className="relative flex-1">
+                            <FormItem>
                               <FormLabel>Product Keywords</FormLabel>
                               <FormControl>
                                 <ReactTags
                                   handleAddition={handleAddition}
+                                  autofocus={false}
                                   handleDelete={() => {}}
-                                  placeholder="Keywords (e.g., winter jacket, warm, stylish)"
+                                  placeholder="Add keywords (e.g., winter jacket, warm, stylish)"
                                   classNames={{
                                     tagInputField:
-                                      "bg-background border rounded-md p-2 w-full focus:outline-none",
+                                      "bg-background border rounded-md p-3 w-full focus:outline-none focus:ring-2 focus:ring-primary/20",
                                   }}
                                 />
                               </FormControl>
                             </FormItem>
                           )}
                         />
-                        <div className="flex flex-wrap gap-1">
-                          {keywords.map((k, i) => (
-                            <Badge
-                              key={i}
-                              variant="secondary"
-                              className="gap-2 py-1 px-3 bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                            >
-                              <span>{k}</span>
-                              <span
-                                className="cursor-pointer hover:bg-primary/20 rounded-full p-0.5 transition-colors"
-                                onClick={() => handleDeleteKeyword(i)}
-                              >
-                                <X className="h-3 w-3" />
-                              </span>
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </InputFieldset>
 
-                  {/* Sizes*/}
-                  <InputFieldset
-                    label="Sizes, Quantities, Prices, Disocunts"
-                    icon={<Scale className="h-5 w-5" />}
-                    description="Configure available sizes with pricing and inventory"
-                  >
-                    <div className="w-full flex flex-col gap-y-3">
-                      <ClickToAddInputs
-                        details={sizes}
-                        setDetails={setSizes}
-                        initialDetail={{
-                          size: "",
-                          quantity: 1,
-                          price: 0.01,
-                          discount: 0,
-                        }}
-                        containerClassName="flex-1"
-                        inputClassName="w-full"
-                      />
-                      {errors.sizes && (
-                        <span className="text-sm font-medium text-destructive">
-                          {errors.sizes.message}
-                        </span>
-                      )}
-                    </div>
-                  </InputFieldset>
-
-                  {/* Product and variant specs*/}
-                  <InputFieldset
-                    label="Specifications"
-                    icon={<FileText className="h-5 w-5" />}
-                    description={
-                      isNewVariantPage
-                        ? ""
-                        : "Note: The product specifications are the main specs for the product (Will display in every variant page). You can add extra specs specific to this variant using 'Variant Specifications' tab."
-                    }
-                  >
-                    <Tabs
-                      defaultValue={
-                        isNewVariantPage ? "variantSpecs" : "productSpecs"
-                      }
-                      className="w-full"
-                    >
-                      {!isNewVariantPage && (
-                        <TabsList className="w-full grid grid-cols-2">
-                          <TabsTrigger value="productSpecs">
-                            Product Specifications
-                          </TabsTrigger>
-                          <TabsTrigger value="variantSpecs">
-                            Variant Specifications
-                          </TabsTrigger>
-                        </TabsList>
-                      )}
-                      <TabsContent value="productSpecs">
-                        <div className="w-full flex flex-col gap-y-3">
-                          <ClickToAddInputs
-                            details={productSpecs}
-                            setDetails={setProductSpecs}
-                            initialDetail={{
-                              name: "",
-                              value: "",
-                            }}
-                            containerClassName="flex-1"
-                            inputClassName="w-full"
-                          />
-                          {errors.product_specs && (
-                            <span className="text-sm font-medium text-destructive">
-                              {errors.product_specs.message}
-                            </span>
-                          )}
-                        </div>
-                      </TabsContent>
-                      <TabsContent value="variantSpecs">
-                        <div className="w-full flex flex-col gap-y-3">
-                          <ClickToAddInputs
-                            details={variantSpecs}
-                            setDetails={setVariantSpecs}
-                            initialDetail={{
-                              name: "",
-                              value: "",
-                            }}
-                            containerClassName="flex-1"
-                            inputClassName="w-full"
-                          />
-                          {errors.variant_specs && (
-                            <span className="text-sm font-medium text-destructive">
-                              {errors.variant_specs.message}
-                            </span>
-                          )}
-                        </div>
-                      </TabsContent>
-                    </Tabs>
-                  </InputFieldset>
-
-                  {/* Questions*/}
-                  {!isNewVariantPage && (
-                    <InputFieldset
-                      label="Questions & Answers"
-                      description="Common questions and answers about your product"
-                      icon={<HelpCircle className="h-5 w-5" />}
-                    >
-                      <div className="w-full flex flex-col gap-y-3">
-                        <ClickToAddInputs
-                          details={questions}
-                          setDetails={setQuestions}
-                          initialDetail={{
-                            question: "",
-                            answer: "",
-                          }}
-                          containerClassName="flex-1"
-                          inputClassName="w-full"
-                        />
-                        {errors.questions && (
-                          <span className="text-sm font-medium text-destructive">
-                            {errors.questions.message}
-                          </span>
+                        {keywords.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {keywords.map((keyword, index) => (
+                              <KeywordTag
+                                key={index}
+                                keyword={keyword}
+                                onRemove={() => handleDeleteKeyword(index)}
+                              />
+                            ))}
+                          </div>
                         )}
                       </div>
-                    </InputFieldset>
-                  )}
+                    </div>
+                  </FormSection>
 
-                  {/* Is On Sale */}
-                  <InputFieldset
+                  {/* Sizes & Pricing Section */}
+                  <FormSection
+                    icon={<Scale className="h-5 w-5" />}
+                    title="Sizes, Quantities & Pricing"
+                    description="Configure available sizes with pricing and inventory"
+                  >
+                    <ClickToAddInputs
+                      details={sizes}
+                      setDetails={setSizes}
+                      initialDetail={{
+                        size: "",
+                        quantity: 1,
+                        price: 0.01,
+                        discount: 0,
+                      }}
+                      containerClassName="w-full"
+                      inputClassName="w-full"
+                    />
+                    {errors.sizes && (
+                      <p className="text-sm text-destructive mt-2">
+                        {errors.sizes.message}
+                      </p>
+                    )}
+                  </FormSection>
+
+                  {/* Specifications Section */}
+                  <FormSection
+                    icon={<FileText className="h-5 w-5" />}
+                    title="Product Specifications"
+                    description="Detailed technical specifications for product and variants"
+                  >
+                    <Tabs className="w-full" defaultValue="productSpecs">
+                      <TabsList className="w-full h-12 bg-muted/50">
+                        <TabsTrigger
+                          value="productSpecs"
+                          className="flex-1 h-10"
+                        >
+                          Product Specifications
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="variantSpecs"
+                          className="flex-1 h-10"
+                        >
+                          Variant Specifications
+                        </TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value="productSpecs" className="mt-6">
+                        <ClickToAddInputs
+                          details={productSpecs}
+                          setDetails={setProductSpecs}
+                          initialDetail={{ name: "", value: "" }}
+                        />
+                        {errors.product_specs && (
+                          <p className="text-sm text-destructive mt-2">
+                            {errors.product_specs.message}
+                          </p>
+                        )}
+                      </TabsContent>
+
+                      <TabsContent value="variantSpecs" className="mt-6">
+                        <ClickToAddInputs
+                          details={variantSpecs}
+                          setDetails={setVariantSpecs}
+                          initialDetail={{ name: "", value: "" }}
+                        />
+                        {errors.variant_specs && (
+                          <p className="text-sm text-destructive mt-2">
+                            {errors.variant_specs.message}
+                          </p>
+                        )}
+                      </TabsContent>
+                    </Tabs>
+                  </FormSection>
+
+                  {/* Q&A Section */}
+                  <FormSection
+                    icon={<HelpCircle className="h-5 w-5" />}
+                    title="Questions & Answers"
+                    description="Common questions and answers about your product"
+                  >
+                    <ClickToAddInputs
+                      details={questions}
+                      setDetails={setQuestions}
+                      initialDetail={{
+                        question: "",
+                        answer: "",
+                      }}
+                      containerClassName="w-full"
+                      inputClassName="w-full"
+                    />
+                    {errors.questions && (
+                      <p className="text-sm text-destructive mt-2">
+                        {errors.questions.message}
+                      </p>
+                    )}
+                  </FormSection>
+
+                  {/* Sale Settings Section */}
+                  <FormSection
                     icon={<Calendar className="h-5 w-5" />}
-                    label="Sale"
+                    title="Sale Configuration"
                     description="Configure if your product is on sale"
                   >
-                    <div>
-                      <label
-                        htmlFor="yes"
-                        className="ml-5 flex items-center gap-x-2 cursor-pointer"
-                      >
-                        <FormField
-                          control={form.control}
-                          name="isSale"
-                          render={({ field }) => (
-                            <FormItem>
+                    <div className="space-y-6">
+                      <FormField
+                        control={form.control}
+                        name="isSale"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="flex items-center space-x-3">
                               <FormControl>
-                                <>
-                                  <input
-                                    type="checkbox"
-                                    id="yes"
-                                    checked={field.value}
-                                    onChange={field.onChange}
-                                    hidden
-                                  />
-                                  <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </>
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                  className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                                />
                               </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                        <span>Yes</span>
-                      </label>
+                              <FormLabel className="text-base font-medium cursor-pointer">
+                                This product is on sale
+                              </FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
 
                       {form.getValues().isSale && (
-                        <div className="mt-5">
-                          <p className="text-sm text-main-secondary dark:text-gray-400 pb-3 flex">
-                            <Dot className="-me-1" />
-                            When sale does end ?
-                          </p>
-                          <div className="flex items-center gap-x-5">
+                        <div className="bg-form-accent rounded-lg p-6 border border-form-border">
+                          <div className="flex items-center gap-2 mb-4">
+                            <Dot className="text-primary" />
+                            <span className="text-sm font-medium">
+                              When does the sale end?
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-4">
                             <FormField
                               control={form.control}
                               name="saleEndDate"
                               render={({ field }) => (
-                                <FormItem className="ml-4">
+                                <FormItem>
                                   <FormControl>
                                     <DateTimePicker
-                                      className="inline-flex items-center gap-2 p-2 border rounded-md shadow-sm"
+                                      className="inline-flex items-center gap-2 p-3 border rounded-md shadow-sm h-12 bg-background"
                                       calendarIcon={
-                                        <span className="text-gray-500 hover:text-gray-600">
-                                          📅
-                                        </span>
+                                        <Calendar className="h-4 w-4 text-muted-foreground" />
                                       }
                                       clearIcon={
-                                        <span className="text-gray-500 hover:text-gray-600">
-                                          ✖️
-                                        </span>
+                                        <X className="h-4 w-4 text-muted-foreground" />
                                       }
                                       onChange={(date) => {
                                         field.onChange(
@@ -986,18 +990,21 @@ const ProductDetails: FC<ProductDetailsProps> = ({
                                 </FormItem>
                               )}
                             />
-                            <ArrowRight className="w-4 text-[#1087ff]" />
-                            <span>{formattedDate}</span>
+
+                            <ArrowRight className="h-4 w-4 text-primary" />
+
+                            <div className="bg-primary/10 px-4 py-2 rounded-lg">
+                              <span className="text-sm font-medium text-primary">
+                                {formattedDate}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       )}
                     </div>
-                  </InputFieldset>
+                  </FormSection>
 
-                  {/* Shipping fee method */}
-
-                  {/* Fee Shipping */}
-
+                  {/* Submit Button */}
                   <div className="flex justify-end pt-6">
                     <Button
                       type="submit"

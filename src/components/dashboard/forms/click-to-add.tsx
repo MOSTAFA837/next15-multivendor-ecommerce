@@ -1,5 +1,5 @@
 // React, Next.js
-import React, { useState } from "react";
+import React, { FC, useState } from "react";
 
 // UI Components
 import { Input } from "@/components/ui/input";

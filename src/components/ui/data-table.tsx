@@ -73,7 +73,7 @@ export default function DataTable<TData, TValue>({
   return (
     <>
       {/* Search input and action button */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between ">
         <div className="flex items-center py-4 gap-2">
           <Search />
           <Input

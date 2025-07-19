@@ -257,6 +257,7 @@ export const getProductVariant = async (
     },
     include: {
       category: true,
+      offerTag: true,
       subCategory: true,
       variants: {
         where: {
@@ -282,6 +283,7 @@ export const getProductVariant = async (
     },
   });
   if (!product) return;
+
   return {
     productId: product?.id,
     variantId: product?.variants[0].id,
@@ -291,6 +293,7 @@ export const getProductVariant = async (
     variantDescription: product.variants[0].variantDescription,
     images: product.variants[0].images,
     categoryId: product.categoryId,
+    offerTagId: product.offerTagId,
     subCategoryId: product.subCategoryId,
     isSale: product.variants[0].isSale,
     brand: product.brand,
@@ -298,6 +301,7 @@ export const getProductVariant = async (
     colors: product.variants[0].colors,
     sizes: product.variants[0].sizes,
     keywords: product.variants[0].keywords.split(","),
+    variantImage: product.variants[0].variantImage,
   };
 };
 
