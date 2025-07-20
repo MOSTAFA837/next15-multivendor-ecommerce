@@ -9,9 +9,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 interface ActionsProps {
   shippingFeeMethod: string;
   store: Store;
+  weight?: number | null;
 }
 
-export default function Actions({ shippingFeeMethod, store }: ActionsProps) {
+export default function Actions({
+  shippingFeeMethod,
+  store,
+  weight,
+}: ActionsProps) {
+  const [loading, setLoading] = useState(true);
+
   const [shippingDetails, setShippingDetails] =
     useState<ShippingDetailsType | null>(null);
 
@@ -21,6 +28,7 @@ export default function Actions({ shippingFeeMethod, store }: ActionsProps) {
 
       if (data) {
         setShippingDetails(data);
+        setLoading(false);
       } else {
         setShippingDetails(null);
       }
@@ -31,7 +39,6 @@ export default function Actions({ shippingFeeMethod, store }: ActionsProps) {
 
   return (
     <div className="max-w-md mx-auto p-4">
-      {/* Your original code styled with shadcn/ui */}
       <Card className="shadow-sm border-slate-200 bg-gradient-to-b from-white to-slate-50/50">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -44,7 +51,8 @@ export default function Actions({ shippingFeeMethod, store }: ActionsProps) {
             <ShippingDetails
               shippingDetails={shippingDetails}
               quantity={1}
-              weight={1}
+              weight={weight}
+              loading={loading}
             />
           )}
         </CardContent>

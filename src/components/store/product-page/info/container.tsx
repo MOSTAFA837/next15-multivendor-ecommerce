@@ -79,6 +79,7 @@ export default function ProductPageContainer({
               <Actions
                 shippingFeeMethod={productData.shippingFeeMethod}
                 store={productData.store}
+                weight={weight}
               />
             </div>
           </div>
