@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { ProductType, VariantSimplified } from "@/lib/types";
 import ProductCardImageSwiper from "./swiper";
 import VariantSwitcher from "./variant-switcher";
+import ProductPrice from "../../product-page/info/price";
 
 interface ProductCardProps {
   product: ProductType;
@@ -19,7 +20,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const [variant, setVariant] = useState<VariantSimplified>(variants[0]);
 
-  const { variantSlug, variantName, images } = variant;
+  const { variantSlug, variantName, images, sizes } = variant;
 
   return (
     <div>
@@ -54,6 +55,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <div className="text-xs text-main-secondary">{sales} sold</div>
               </div>
             )}
+
+            <ProductPrice sizes={sizes} isCard />
           </Link>
         </div>
 

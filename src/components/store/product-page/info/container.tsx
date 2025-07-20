@@ -22,16 +22,16 @@ export default function ProductPageContainer({
   const { images } = productData;
 
   return (
-    <div className="relative">
-      <div className="w-full xl:flex xl:gap-4">
-        <div className="w-full flex-1">
-          <ProductSwiper images={images} />
-        </div>
+    <div className="relative min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="w-full flex-1">
+            <ProductSwiper images={images} />
+          </div>
 
-        {/* {JSON.stringify(productData)} */}
-
-        <div className="w-full mt-4 md:mt-0 flex flex-col gap-4 lg:flex-row">
-          <ProductInfo productData={productData} sizeId={sizeId} />
+          <div className="space-y-8">
+            <ProductInfo productData={productData} sizeId={sizeId} />
+          </div>
         </div>
       </div>
     </div>

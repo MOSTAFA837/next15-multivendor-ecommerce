@@ -18,7 +18,7 @@ export default function ProductSwiper({ images }: ProductSwiperProps) {
   );
 
   return (
-    <div className="relative xl:w-[25vw] swiper1700width">
+    <div className="relative swiper1700width">
       <div className="relative w-full flex 2xl:flex-row gap-2">
         {/* Thumbnails */}
         <div className="flex flex-col">
@@ -47,7 +47,7 @@ export default function ProductSwiper({ images }: ProductSwiperProps) {
         </div>
 
         {/* Image view */}
-        <div className="relative rounded-lg overflow-hidden flex flex-grow min-h-[500px] w-full h-full">
+        <div className="relative rounded-lg overflow-hidden flex flex-grow  w-full h-full">
           <ImageZoom
             src={activeImage ? activeImage.url : ""}
             zoom={200}
