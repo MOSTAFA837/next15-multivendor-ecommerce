@@ -1,4 +1,5 @@
 import {
+  CartProductType,
   ProductDataType,
   ProductPageDataType,
   ProductVariantDataType,
@@ -27,6 +28,7 @@ interface ProductInfoProps {
   sizeId: string | undefined;
   setSizeId: Dispatch<SetStateAction<string>>;
   setActiveImage: Dispatch<SetStateAction<{ url: string } | null>>;
+  handleChange: (property: keyof CartProductType, value: any) => void;
 }
 
 export default function ProductInfo({
@@ -37,6 +39,7 @@ export default function ProductInfo({
   setSizeId,
   setVariant,
   setActiveImage,
+  handleChange,
 }: ProductInfoProps) {
   const { toast } = useToast();
 
@@ -135,7 +138,11 @@ export default function ProductInfo({
 
       {/* Price */}
       <div className="space-y-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-        <ProductPrice sizeId={sizeId} sizes={sizes} />
+        <ProductPrice
+          sizeId={sizeId}
+          sizes={sizes}
+          handleChange={handleChange}
+        />
 
         {isSale && saleEndDate && (
           <Countdown targetDate={saleEndDate} sizeId={sizeId} sizes={sizes} />

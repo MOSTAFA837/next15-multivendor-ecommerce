@@ -5,6 +5,7 @@ import { Store } from "@prisma/client";
 import ShippingDetails from "./shipping-details";
 import { Truck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import ReturnPrivacy from "./return-privacy";
 
 interface ActionsProps {
   shippingFeeMethod: string;
@@ -55,6 +56,11 @@ export default function Actions({
               loading={loading}
             />
           )}
+
+          <ReturnPrivacy
+            returnPolicy={shippingDetails?.returnPolicy}
+            loading={loading}
+          />
         </CardContent>
       </Card>
     </div>

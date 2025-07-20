@@ -179,3 +179,26 @@ export type ShippingDetailsType = {
   shippingService: string;
   returnPolicy: string;
 };
+
+export type CartProductType = {
+  productId: string;
+  variantId: string;
+  productSlug: string;
+  variantSlug: string;
+  name: string;
+  variantName?: string | null;
+  image: string;
+  variantImage?: string | null;
+  sizeId: string;
+  size: string;
+  quantity: number;
+  price: number;
+  stock: number;
+  weight: number | null;
+  shippingMethod: string;
+  shippingService: string;
+  shippingFee: number;
+  extraShippingFee: number;
+  deliveryTimeMin: number;
+  deliveryTimeMax: number;
+};
