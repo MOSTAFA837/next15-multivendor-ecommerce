@@ -29,6 +29,8 @@ export default function ProductPageContainer({
             <ProductSwiper images={images} />
           </div>
 
+          {/* {JSON.stringify(productData.colors)} */}
+
           <div className="space-y-8">
             <ProductInfo productData={productData} sizeId={sizeId} />
           </div>

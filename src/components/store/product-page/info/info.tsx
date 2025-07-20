@@ -8,6 +8,8 @@ import ProductPrice from "./price";
 import Countdown from "../../shared/countdown";
 import { Badge } from "@/components/ui/badge";
 import { Camera, Star } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import ColorWheel from "@/components/shared/color-wheel";
 
 interface ProductInfoProps {
   productData: ProductPageDataType;
@@ -29,6 +31,7 @@ export default function ProductInfo({ productData, sizeId }: ProductInfoProps) {
     isSale,
     sku,
     sizes,
+    colors,
   } = productData;
 
   const copySkuToClipboard = async () => {
@@ -110,6 +113,17 @@ export default function ProductInfo({ productData, sizeId }: ProductInfoProps) {
         {isSale && saleEndDate && (
           <Countdown targetDate={saleEndDate} sizeId={sizeId} sizes={sizes} />
         )}
+      </div>
+
+      <Separator className="my-4" />
+
+      <div className="space-y-2">
+        <div className="relative flex items-center justify-between text-main-primary font-bold">
+          <span className="flex items-center gap-x-2">
+            {colors.length > 1 ? "Colors" : "Color"}
+            <ColorWheel colors={colors} size={35} />
+          </span>
+        </div>
       </div>
     </div>
   );
