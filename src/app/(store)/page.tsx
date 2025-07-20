@@ -4,7 +4,7 @@ import React from "react";
 import { signOut } from "next-auth/react";
 import { useCurrentuser } from "@/lib/use-current-user";
 
-export default function SettingsPage() {
+export default function Home() {
   const user = useCurrentuser();
 
   const onClick = () => {

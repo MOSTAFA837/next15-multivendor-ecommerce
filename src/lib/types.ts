@@ -1,7 +1,8 @@
 import { getAllStoreProducts } from "@/queries/product";
 import { getStoreDefaultShippingDetails } from "@/queries/store";
 import { getAllSubCategories } from "@/queries/sub-category";
-import { Prisma, ShippingRate } from "@prisma/client";
+import { Category, Prisma, ShippingRate, SubCategory } from "@prisma/client";
+import countries from "@/data/countries.json";
 
 export interface DashboardSidebarMenuInterface {
   label: string;
@@ -87,4 +88,17 @@ export type StoreType = {
   defaultShippingFeePerItem?: number;
   defaultShippingFeePerKg?: number;
   returnPolicy?: string;
+};
+
+export interface Country {
+  name: string;
+  code: string;
+  city: string;
+  region: string;
+}
+
+export type SelectMenuOption = (typeof countries)[number];
+
+export type CategoryWithSubCategories = Category & {
+  subCategories: SubCategory[];
 };
