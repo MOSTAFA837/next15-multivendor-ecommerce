@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import {
+  ProductPageType,
   ProductWithVariantType,
   VariantImageType,
   VariantSimplified,
@@ -433,5 +434,101 @@ export const getProducts = async (
     totalPages,
     currentPage,
     pageSize,
+  };
+};
+
+export const getProductPageData = async (
+  productSlug: string,
+  variantSlug: string
+) => {
+  const product = await retrieveProductDetails(productSlug, variantSlug);
+
+  if (!product) return;
+
+  return formatProductResponse(product);
+};
+
+export const retrieveProductDetails = async (
+  productSlug: string,
+  variantSlug: string
+) => {
+  return await db.product.findUnique({
+    where: {
+      slug: productSlug,
+    },
+    include: {
+      category: true,
+      subCategory: true,
+      offerTag: true,
+      store: true,
+      specs: true,
+      questions: true,
+      variants: {
+        where: {
+          slug: variantSlug,
+        },
+        include: {
+          images: true,
+          colors: true,
+          sizes: true,
+          specs: true,
+        },
+      },
+    },
+  });
+};
+
+const formatProductResponse = async (product: ProductPageType) => {
+  if (!product) return;
+
+  const variant = product.variants[0];
+
+  const { store, category, subCategory, offerTag, questions } = product;
+  const { images, colors, sizes } = variant;
+
+  return {
+    productId: product.id,
+    variantId: variant.id,
+    productSlug: product.slug,
+    variantSlug: variant.slug,
+    name: product.name,
+    description: product.description,
+    variantName: variant.variantName,
+    variantDescription: variant.variantDescription,
+    images,
+    variants: product.variants,
+    category,
+    subCategory,
+    offerTag,
+    isSale: variant.isSale,
+    saleEndDate: variant.saleEndDate,
+    brand: product.brand,
+    sku: variant.sku,
+    weight: variant.weight,
+    variantImage: variant.variantImage,
+    colors,
+    sizes,
+    store: {
+      id: store.id,
+      url: store.url,
+      name: store.name,
+      logo: store.logo,
+      followersCount: 10,
+      isUSerFollowingStore: true,
+    },
+    specs: {
+      product: product.specs,
+      variant: variant.specs,
+    },
+    questions,
+    rating: product.rating,
+    reviews: [],
+    numReviews: 122,
+    reviewStatistics: {
+      ratingStatistics: [],
+      reviewsWithImageCount: 5,
+    },
+    shippingDetails: {},
+    relatedProducts: [],
   };
 };
