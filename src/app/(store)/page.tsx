@@ -1,23 +1,12 @@
-"use client";
+import ProductList from "@/components/store/shared/product-list";
+import { getProducts } from "@/queries/product";
 
-import React from "react";
-import { signOut } from "next-auth/react";
-import { useCurrentuser } from "@/lib/use-current-user";
-
-export default function Home() {
-  const user = useCurrentuser();
-
-  const onClick = () => {
-    signOut();
-  };
+export default async function Home() {
+  const { products } = await getProducts();
 
   return (
-    <div>
-      {JSON.stringify(user)}
-
-      <button className="w-full cursor-pointer" onClick={onClick}>
-        Sign Out
-      </button>
+    <div className="p-14">
+      <ProductList products={products} title="All Products" arrow />
     </div>
   );
 }
