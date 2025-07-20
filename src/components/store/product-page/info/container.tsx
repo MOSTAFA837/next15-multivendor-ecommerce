@@ -64,7 +64,7 @@ export default function ProductPageContainer({
     variantName,
     image: images[0].url,
     variantImage,
-    sizeId,
+    sizeId: sizeId || "",
     size: "",
     quantity: 1,
     price: 0,
@@ -122,6 +122,10 @@ export default function ProductPageContainer({
                 shippingFeeMethod={productData.shippingFeeMethod}
                 store={productData.store}
                 weight={weight}
+                sizeId={sizeId}
+                productToCart={productToCart}
+                handleChange={handleChange}
+                sizes={sizes}
               />
             </div>
           </div>
