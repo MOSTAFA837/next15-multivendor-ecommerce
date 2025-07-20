@@ -2,7 +2,9 @@ import {
   getAllStoreProducts,
   getProductPageData,
   getProducts,
+  getShippingDetails,
   retrieveProductDetails,
+  retrieveProductDetailsOptimized,
 } from "@/queries/product";
 import { getStoreDefaultShippingDetails } from "@/queries/store";
 import { getAllSubCategories } from "@/queries/sub-category";
@@ -143,11 +145,11 @@ export type ProductPageDataType = Prisma.PromiseReturnType<
 
 export type ProductVariantDataType = {
   id: string;
-  variantName: string;
+  variantName?: string | null;
   slug: string;
   sku: string;
-  variantImage: string;
-  weight: number;
+  variantImage?: string | null;
+  weight: number | null;
   isSale: boolean;
   saleEndDate: string | null;
   variantDescription: string | null;
@@ -158,4 +160,22 @@ export type ProductVariantDataType = {
   specs: Spec[];
   colors: { name: string }[];
   keywords: string;
+};
+
+export type ProductDataType = Prisma.PromiseReturnType<
+  typeof retrieveProductDetailsOptimized
+>;
+
+export type ProductShippingDetailsType = Prisma.PromiseReturnType<
+  typeof getShippingDetails
+>;
+
+export type ShippingDetailsType = {
+  shippingFeeMethod: string;
+  shippingFee: number;
+  extraShippingFee: number;
+  deliveryTimeMin: number;
+  deliveryTimeMax: number;
+  shippingService: string;
+  returnPolicy: string;
 };

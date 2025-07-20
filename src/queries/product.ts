@@ -3,12 +3,14 @@
 import { db } from "@/lib/db";
 import {
   ProductPageType,
+  ProductShippingDetailsType,
   ProductWithVariantType,
   VariantImageType,
   VariantSimplified,
 } from "@/lib/types";
 import { currentUser } from "@/lib/use-current-user";
 import { generateUniqueSlug } from "@/lib/utils";
+import { Store } from "@prisma/client";
 
 import slugify from "slugify";
 
@@ -445,14 +447,20 @@ export const getProductPageData = async (
 
   if (!product) return;
 
-  return formatProductResponse(product);
+  // calculate and retrieve shipping cost
+  const shippingDetails = await getShippingDetails(
+    product.shippingFeeMethod,
+    product.store
+  );
+
+  return formatProductResponse(product, shippingDetails);
 };
 
 export const retrieveProductDetails = async (
   productSlug: string,
   variantSlug: string
 ) => {
-  return await db.product.findUnique({
+  const product = await db.product.findUnique({
     where: {
       slug: productSlug,
     },
@@ -476,9 +484,20 @@ export const retrieveProductDetails = async (
       },
     },
   });
+
+  if (!product) return null;
+
+  const variant_images = await db.productVariant.findMany({
+    where: { productId: product.id },
+  });
+
+  return product;
 };
 
-const formatProductResponse = async (product: ProductPageType) => {
+const formatProductResponse = async (
+  product: ProductPageType,
+  shippingDetails: ProductShippingDetailsType
+) => {
   if (!product) return;
 
   const variant = product.variants[0];
@@ -523,12 +542,117 @@ const formatProductResponse = async (product: ProductPageType) => {
     questions,
     rating: product.rating,
     reviews: [],
-    numReviews: 122,
-    reviewStatistics: {
-      ratingStatistics: [],
-      reviewsWithImageCount: 5,
-    },
-    shippingDetails: {},
+    shippingDetails,
     relatedProducts: [],
   };
+};
+
+export const retrieveProductDetailsOptimized = async (productSlug: string) => {
+  const product = await db.product.findUnique({
+    where: {
+      slug: productSlug,
+    },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      rating: true,
+      numReviews: true,
+      description: true,
+      specs: true,
+      questions: true,
+      categoryId: true,
+      subCategoryId: true,
+      store: true,
+      brand: true,
+      shippingFeeMethod: true,
+      variants: {
+        select: {
+          id: true,
+          variantName: true,
+          variantImage: true,
+          weight: true,
+          slug: true,
+          sku: true,
+          isSale: true,
+          saleEndDate: true,
+          variantDescription: true,
+          keywords: true,
+          specs: true,
+          sizes: true,
+          images: {
+            select: { url: true },
+          },
+          colors: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!product) {
+    throw new Error("Product not found");
+  }
+
+  return product;
+};
+
+export const getShippingDetails = async (
+  shippingFeeMethod: string,
+  store: Store
+) => {
+  const shippingRate = await db.shippingRate.findFirst({
+    where: {
+      storeId: store.id,
+    },
+  });
+
+  const returnPolicy = shippingRate?.returnPolicy || store.returnPolicy;
+  const shippingService =
+    shippingRate?.shippingService || store.defaultShippingService;
+  const shippingFeePerItem =
+    shippingRate?.shippingFeePerItem || store.defaultShippingFeePerItem;
+  const shippingFeeForAdditionalItem =
+    shippingRate?.shippingFeeForAdditionalItem ||
+    store.defaultShippingFeeForAdditionalItem;
+  const shippingFeePerKg =
+    shippingRate?.shippingFeePerKg || store.defaultShippingFeePerKg;
+  const shippingFeeFixed =
+    shippingRate?.shippingFeeFixed || store.defaultShippingFeeFixed;
+  const deliveryTimeMin =
+    shippingRate?.deliveryTimeMin || store.defaultDeliveryTimeMin;
+  const deliveryTimeMax =
+    shippingRate?.deliveryTimeMax || store.defaultDeliveryTimeMax;
+
+  const shippingDetails = {
+    shippingFeeMethod,
+    shippingService,
+    shippingFee: 0,
+    extraShippingFee: 0,
+    deliveryTimeMin,
+    deliveryTimeMax,
+    returnPolicy,
+  };
+
+  switch (shippingFeeMethod) {
+    case "ITEM":
+      shippingDetails.shippingFee = shippingFeePerItem;
+      shippingDetails.extraShippingFee = shippingFeeForAdditionalItem;
+      break;
+
+    case "WEIGHT":
+      shippingDetails.shippingFee = shippingFeePerKg;
+      break;
+
+    case "FIXED":
+      shippingDetails.shippingFee = shippingFeeFixed;
+      break;
+
+    default:
+      break;
+  }
+  return shippingDetails;
 };

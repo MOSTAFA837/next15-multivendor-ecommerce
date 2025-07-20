@@ -1,23 +1,46 @@
-import { db } from "@/lib/db";
-import { redirect } from "next/navigation";
+import ProductPageContainer from "@/components/store/product-page/info/container";
+import { Separator } from "@/components/ui/separator";
+import { Country } from "@/lib/types";
+import { retrieveProductDetailsOptimized } from "@/queries/product";
 
-export default async function ProductPage({
+interface ProductVariantPageProps {
+  params: {
+    productSlug: string;
+  };
+  searchParams: {
+    variant: string;
+  };
+}
+
+export default async function ProductVariantPage({
   params,
-}: {
-  params: { productSlug: string };
-}) {
-  const product = await db.product.findUnique({
-    where: {
-      slug: params.productSlug,
-    },
-    include: {
-      variants: true,
-    },
-  });
+  searchParams,
+}: ProductVariantPageProps) {
+  const product = await retrieveProductDetailsOptimized(params.productSlug);
+  const variant = product.variants.find((v) => v.slug === searchParams.variant);
 
-  if (!product) return redirect("/");
+  const specs = {
+    product: product.specs,
+    variant: variant?.specs,
+  };
 
-  if (!product.variants.length) return redirect("/");
+  const store = {
+    id: product.store.id,
+    name: product.store.name,
+    url: product.store.url,
+    logo: product.store.logo,
+    followersCount: 0,
+    isUserFollowingStore: false,
+  };
 
-  return redirect(`/product/${product.slug}/${product.variants[0].slug}`);
+  return (
+    <div className="max-w-[1650px] mx-auto p-4 overflow-x-hidden">
+      <ProductPageContainer
+        productData={product}
+        variantSlug={searchParams.variant}
+      >
+        <div></div>
+      </ProductPageContainer>
+    </div>
+  );
 }
