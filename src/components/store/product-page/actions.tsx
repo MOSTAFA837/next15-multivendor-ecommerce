@@ -26,6 +26,8 @@ import Descriptions from "./descriptions";
 import { Separator } from "@/components/ui/separator";
 import { useCartStore } from "@/cart/use-cart";
 import { toast } from "@/hooks/use-toast";
+import { addToWishList, checkIfAddedToWishlist } from "@/queries/user";
+import { Heart } from "lucide-react";
 
 interface Specs {
   name: string;
@@ -53,6 +55,8 @@ interface ActionsProps {
   questions: Question[];
   text: [string, string];
   maxQty: number;
+  productId: string;
+  variantId: string;
 }
 
 export default function Actions({
@@ -68,6 +72,8 @@ export default function Actions({
   questions,
   text: [description, variantDescription],
   maxQty,
+  productId,
+  variantId,
 }: ActionsProps) {
   const [loading, setLoading] = useState(true);
 
@@ -103,7 +109,41 @@ export default function Actions({
   };
 
   const cartItems = useCartStore((state) => state.cart);
-  // console.log("cart", cartItems);
+
+  const [isAddedToWishlist, setIsAddedToWishlist] = useState(false);
+
+  // Handle add product to wishlist
+  const handleaddToWishlist = async () => {
+    try {
+      const res = await addToWishList(productId, variantId, sizeId);
+      toast({
+        title: res.id
+          ? "Product added to wishlist"
+          : "Product removed from wishlist",
+      });
+      if (res.id) {
+        setIsAddedToWishlist(true);
+      } else {
+        setIsAddedToWishlist(false);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (!productId || !variantId || !sizeId) return;
+
+    const checkWishlist = async () => {
+      const res = await checkIfAddedToWishlist(productId, variantId, sizeId);
+      setIsAddedToWishlist(res);
+    };
+
+    checkWishlist();
+  }, [productId, sizeId, variantId]);
 
   return (
     <div className="w-full">
@@ -125,6 +165,23 @@ export default function Actions({
             />
           )}
           <div className="mt-5 bg-white bottom-0 pb-4 space-y-3 sticky">
+            <button
+              onClick={() => handleaddToWishlist()}
+              className={cn(
+                "relative w-full flex items-center justify-center gap-x-4 py-2.5 min-w-20 bg-white hover:bg-orange-hover/70 text-orange-background border-orange-background  h-11 rounded-3xl leading-6 font-bold whitespace-nowrap border hover:text-white cursor-pointer transition-all duration-300 ease-bezier-1 select-none"
+              )}
+            >
+              <Heart
+                className={cn("", {
+                  "stroke-orange-seconadry fill-orange-seconadry":
+                    isAddedToWishlist,
+                })}
+              />
+              <span>
+                {isAddedToWishlist ? "Added to wishlist" : "Add to wishlist"}
+              </span>
+            </button>
+
             <Button
               onClick={() => {
                 handleAddToCart();

@@ -206,6 +206,8 @@ export default function ProductPageContainer({
               questions={questions}
               text={[description, variantDescription || ""]}
               maxQty={maxQty}
+              productId={id}
+              variantId={variantId}
             />
           </div>
         </div>

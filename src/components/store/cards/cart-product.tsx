@@ -1,6 +1,8 @@
 import { useCartStore } from "@/cart/use-cart";
+import { toast } from "@/hooks/use-toast";
 import { CartProductType, Country } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { addToWishList, checkIfAddedToWishlist } from "@/queries/user";
 import {
   Check,
   ChevronRight,
@@ -155,6 +157,38 @@ const CartProduct: FC<Props> = ({
     }
   };
 
+  const [isAddedToWishlist, setIsAddedToWishlist] = useState(false);
+
+  const handleaddToWishlist = async () => {
+    try {
+      const res = await addToWishList(productId, variantId, sizeId);
+      toast({
+        title: res.id,
+      });
+      if (res.id) {
+        setIsAddedToWishlist(true);
+      } else {
+        setIsAddedToWishlist(false);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (!productId || !variantId || !sizeId) return;
+
+    const checkWishlist = async () => {
+      const res = await checkIfAddedToWishlist(productId, variantId, sizeId);
+      setIsAddedToWishlist(res);
+    };
+
+    checkWishlist();
+  }, [productId, sizeId, variantId]);
+
   return (
     <div
       className={cn("bg-white px-6 border-t bordet-t-[#ebebeb] select-none", {
@@ -219,15 +253,19 @@ const CartProduct: FC<Props> = ({
               <div className="absolute top-0 right-0">
                 <span
                   className="mr-2.5 cursor-pointer inline-block"
-                  onClick={() => {}}
+                  onClick={() => handleaddToWishlist()}
                 >
-                  <Heart className="w-4 hover:stroke-orange-seconadry" />
+                  <Heart
+                    className={cn("w-4", {
+                      "stroke-rose-600 fill-rose-600": isAddedToWishlist,
+                    })}
+                  />
                 </span>
                 <span
                   className="cursor-pointer inline-block"
                   onClick={() => removeFromCart(product)}
                 >
-                  <Trash className="w-4 hover:stroke-orange-seconadry" />
+                  <Trash className="w-4 hover:stroke-rose-600" />
                 </span>
               </div>
             </div>
