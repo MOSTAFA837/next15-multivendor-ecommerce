@@ -23,10 +23,7 @@ interface StoreCardProps {
   checkForFollowing?: boolean;
 }
 
-export default function StoreCard({
-  store,
-  checkForFollowing,
-}: StoreCardProps) {
+export default function StoreCard({ store }: StoreCardProps) {
   const { id, name, logo, url, followersCount, isUserFollowingStore } = store;
   const [following, setFollowing] = useState<boolean>(isUserFollowingStore);
   const [storeFollowersCount, setStoreFollowersCount] =

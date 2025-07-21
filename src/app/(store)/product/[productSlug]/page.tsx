@@ -1,9 +1,6 @@
 import StoreCard from "@/components/store/cards/store-card";
-import Descriptions from "@/components/store/product-page/descriptions";
 import ProductPageContainer from "@/components/store/product-page/info/container";
-import { Questions } from "@/components/store/product-page/questions";
 import RelatedProducts from "@/components/store/product-page/related-products";
-import Specifications from "@/components/store/product-page/specifications";
 import { Separator } from "@/components/ui/separator";
 import { retrieveProductDetailsOptimized } from "@/queries/product";
 import Reviews from "../../../../components/store/product-page/reviews";
@@ -23,7 +20,6 @@ export default async function ProductVariantPage({
   searchParams,
 }: ProductVariantPageProps) {
   const product = await retrieveProductDetailsOptimized(params.productSlug);
-  const variant = product.variants.find((v) => v.slug === searchParams.variant);
 
   const store = {
     id: product.store.id,

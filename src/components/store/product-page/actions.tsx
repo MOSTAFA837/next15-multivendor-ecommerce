@@ -24,6 +24,8 @@ import Specifications from "./specifications";
 import { Questions } from "./questions";
 import Descriptions from "./descriptions";
 import { Separator } from "@/components/ui/separator";
+import { useCartStore } from "@/cart/use-cart";
+import { toast } from "@/hooks/use-toast";
 
 interface Specs {
   name: string;
@@ -50,6 +52,7 @@ interface ActionsProps {
   };
   questions: Question[];
   text: [string, string];
+  maxQty: number;
 }
 
 export default function Actions({
@@ -64,6 +67,7 @@ export default function Actions({
   specs,
   questions,
   text: [description, variantDescription],
+  maxQty,
 }: ActionsProps) {
   const [loading, setLoading] = useState(true);
 
@@ -85,25 +89,27 @@ export default function Actions({
     getShippingDetailsHandler();
   }, [shippingFeeMethod, store]);
 
+  const addToCart = useCartStore((state) => state.addToCart);
+
+  const handleAddToCart = () => {
+    if (maxQty <= 0) return;
+
+    addToCart(productToCart);
+
+    toast({
+      title: "Product added",
+      description: "The product has been added to your cart.",
+    });
+  };
+
+  const cartItems = useCartStore((state) => state.cart);
+  // console.log("cart", cartItems);
+
   return (
     <div className="w-full">
       <div className="shadow-sm ">
         {/* Quantity Selector - Outside accordion, stays sticky */}
         <div className="px-0 pb-4">
-          {/* {sizeId && (
-            <div className="w-full flex">
-              <QuantitySelector
-                productId={productToCart.productId}
-                variantId={productToCart.variantId}
-                sizeId={productToCart.sizeId}
-                quantity={productToCart.quantity}
-                stock={productToCart.stock}
-                handleChange={handleChange}
-                sizes={sizes}
-              />
-            </div>
-          )} */}
-
           {shippingDetails && (
             <ShippingDetails
               shippingDetails={shippingDetails}
@@ -120,7 +126,9 @@ export default function Actions({
           )}
           <div className="mt-5 bg-white bottom-0 pb-4 space-y-3 sticky">
             <Button
-              onClick={() => {}}
+              onClick={() => {
+                handleAddToCart();
+              }}
               className={cn(
                 "relative w-full py-2.5 min-w-20 bg-orange-background hover:bg-orange-hover text-black h-11 rounded-3xl leading-6 inline-block font-bold whitespace-nowrap border border-orange-border cursor-pointer transition-all duration-300 ease-bezier-1 select-none"
               )}
@@ -132,7 +140,7 @@ export default function Actions({
               className={cn(
                 "relative w-full py-2.5 min-w-20 bg-black hover:bg-black/70 text-white h-11 rounded-3xl leading-6 inline-block font-bold whitespace-nowrap border border-orange-border cursor-pointer transition-all duration-300 ease-bezier-1 select-none"
               )}
-              onClick={() => {}}
+              onClick={handleAddToCart}
             >
               <span>Add to cart</span>
             </Button>

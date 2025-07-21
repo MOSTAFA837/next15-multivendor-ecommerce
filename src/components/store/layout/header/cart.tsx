@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { CartIcon } from "../../icons";
+import { useCartStore } from "@/cart/use-cart";
 
 export default function Cart() {
-  const totalItems = 5;
+  const totalItems = useCartStore((state) => state.totalItems);
 
   return (
     <div className="relative flex h-11 items-center px-2 cursor-pointer">
@@ -14,7 +15,7 @@ export default function Cart() {
         </span>
 
         <div className="min-h-3 min-w-6 -mt-1.5 absolute right-0 -top-1">
-          <span className="inline-block text-xs text-main-primary leading-4 text-white text-center font-bold w-4 rounded-full px-1 h-4 bg-blue-600">
+          <span className="inline-block text-xs  leading-4 text-white text-center font-bold w-4 rounded-full px-1 h-4 bg-blue-600">
             {totalItems}
           </span>
         </div>
