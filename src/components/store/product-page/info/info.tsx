@@ -151,43 +151,44 @@ export default function ProductInfo({
 
       <Separator className="my-4" />
 
-      <div className="space-y-2">
-        <div className="relative flex items-center justify-between text-main-primary font-bold">
-          <span className="flex items-center gap-x-2">
-            {colors.length > 1 ? "Colors" : "Color"}
-            <ColorWheel colors={colors} size={35} />
-          </span>
+      <div className="flex justify-between items-center w-full">
+        <div className="space-y-2">
+          <div className="relative flex items-center justify-between text-main-primary font-bold">
+            <span className="flex items-center flex-col gap-x-2">
+              {colors.length > 1 ? "Colors" : "Color"}
+              <ColorWheel colors={colors} size={35} />
+            </span>
+          </div>
         </div>
-      </div>
 
-      <div className="mt-4">
-        {variants.length > 0 && (
-          <ProductVariantSelector
-            variants={variants}
-            slug={variant.slug}
+        <div className="mt-4">
+          {variants.length > 0 && (
+            <ProductVariantSelector
+              variants={variants}
+              slug={variant.slug}
+              setSizeId={setSizeId}
+              setVariant={setVariant}
+              setActiveImage={setActiveImage}
+            />
+          )}
+        </div>
+
+        <div className="space-y-2 pb-2 mt-4">
+          <div>
+            <h1 className="text-main-primary font-bold">Size </h1>
+          </div>
+
+          <SizeSelector
+            sizes={variant.sizes}
+            sizeId={sizeId}
             setSizeId={setSizeId}
-            setVariant={setVariant}
-            setActiveImage={setActiveImage}
           />
-        )}
-      </div>
-
-      <div className="space-y-2 pb-2 mt-4">
-        <div>
-          <h1 className="text-main-primary font-bold">Size </h1>
         </div>
-
-        <SizeSelector
-          sizes={variant.sizes}
-          sizeId={sizeId}
-          setSizeId={setSizeId}
-        />
       </div>
 
       <Separator className="mt-2" />
-      <AssurancePolicy />
 
-      <div className="p-6 max-w-2xl mx-auto">
+      <div className="py-6 max-w-2xl mx-auto">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <Tag className="w-5 h-5 text-slate-600" />
           Product Tags

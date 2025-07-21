@@ -35,8 +35,8 @@ export default function QuantitySelector({
   };
 
   return (
-    <div className="w-full p-2 bg-white border border-gray-200 rounded-lg">
-      <div className="w-full flex justify-between items-center gap-x-5">
+    <div className="p-2 bg-white border border-gray-200 rounded-lg">
+      <div className="w-full flex justify-end items-center gap-x-5">
         <div className="grow">
           <span className="block text-xs text-gray-500">Select Quantity</span>
 

@@ -1,6 +1,6 @@
 import ProductPageContainer from "@/components/store/product-page/info/container";
+import RelatedProducts from "@/components/store/product-page/related-products";
 import { Separator } from "@/components/ui/separator";
-import { Country } from "@/lib/types";
 import { retrieveProductDetailsOptimized } from "@/queries/product";
 
 interface ProductVariantPageProps {
@@ -39,7 +39,14 @@ export default async function ProductVariantPage({
         productData={product}
         variantSlug={searchParams.variant}
       >
-        <div></div>
+        <Separator />
+
+        {/* related products */}
+        <RelatedProducts
+          productId={product.id}
+          categoryId={product.categoryId}
+          subCategoryId={product.subCategoryId}
+        />
       </ProductPageContainer>
     </div>
   );

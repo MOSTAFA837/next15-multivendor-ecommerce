@@ -117,18 +117,24 @@ export default function ProductPageContainer({
               handleChange={handleChange}
             />
 
-            <div className="w-full lg:w-[390px]">
-              <Actions
-                shippingFeeMethod={productData.shippingFeeMethod}
-                store={productData.store}
-                weight={weight}
-                sizeId={sizeId}
-                productToCart={productToCart}
-                handleChange={handleChange}
-                sizes={sizes}
-              />
-            </div>
+            <Actions
+              shippingFeeMethod={productData.shippingFeeMethod}
+              store={productData.store}
+              weight={weight}
+              sizeId={sizeId}
+              productToCart={productToCart}
+              handleChange={handleChange}
+              sizes={sizes}
+              isProductValid={isProductValid}
+            />
           </div>
+        </div>
+
+        <div
+          id="children-container"
+          className="lg:w-[calc(100%-410px)] mt-6 pb-16"
+        >
+          {children}
         </div>
       </div>
     </div>

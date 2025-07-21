@@ -44,7 +44,7 @@ export default function ShippingFee({
 
           {/* Fee Structure */}
           <Card className="border-gray-200">
-            <CardContent className="p-4">
+            <CardContent className="">
               {fee === extraFee || extraFee === 0 ? (
                 <div className="grid grid-cols-2 gap-4 items-center">
                   <span className="text-sm font-medium text-gray-700">
@@ -81,28 +81,25 @@ export default function ShippingFee({
                   <span className="text-sm font-medium text-gray-700">
                     Quantity
                   </span>
-                  <Badge variant="secondary" className="justify-center">
+                  <Badge variant="outline" className="justify-center">
                     x{quantity}
                   </Badge>
                 </div>
 
-                <Card className="bg-gray-900 text-white border-gray-900">
-                  <CardContent className="p-3">
-                    <div className="text-center text-sm font-medium">
-                      {quantity === 1 || fee === extraFee ? (
-                        <span>
-                          ${fee} (fee) × {quantity} (items) = ${fee * quantity}
-                        </span>
-                      ) : (
-                        <span>
-                          ${fee} (first item) + {quantity - 1} (additional
-                          items) × ${extraFee} = $
-                          {fee + extraFee * (quantity - 1)}
-                        </span>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="bg-gray-900 text-white border-gray-900 py-2 rounded-md">
+                  <div className="text-center text-sm font-medium">
+                    {quantity === 1 || fee === extraFee ? (
+                      <span>
+                        ${fee} (fee) × {quantity} (items) = ${fee * quantity}
+                      </span>
+                    ) : (
+                      <span>
+                        ${fee} (first item) + {quantity - 1} (additional items)
+                        × ${extraFee} = ${fee + extraFee * (quantity - 1)}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -181,7 +178,7 @@ export default function ShippingFee({
 
           {/* Fee Structure */}
           <Card className="border-gray-200">
-            <CardContent className="p-4">
+            <CardContent className="">
               <div className="grid grid-cols-2 gap-4 items-center mb-4">
                 <span className="text-sm font-medium text-gray-700">Fee</span>
                 <Badge variant="outline" className="justify-center">
@@ -194,18 +191,16 @@ export default function ShippingFee({
                   <span className="text-sm font-medium text-gray-700">
                     Quantity
                   </span>
-                  <Badge variant="secondary" className="justify-center">
+                  <Badge variant="outline" className="justify-center">
                     x{quantity}
                   </Badge>
                 </div>
 
-                <Card className="bg-gray-900 text-white border-gray-900">
-                  <CardContent className="p-3">
-                    <div className="text-center text-sm font-medium">
-                      ${fee} (quantity doesn&apos;t affect shipping fee.)
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="bg-gray-900 text-white border-gray-900 py-2 rounded-md">
+                  <div className="text-center text-sm font-medium">
+                    ${fee} (quantity doesn&apos;t affect shipping fee.)
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

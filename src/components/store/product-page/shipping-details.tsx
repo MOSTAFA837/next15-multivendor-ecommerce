@@ -1,17 +1,25 @@
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronRight, ChevronUp, Truck } from "lucide-react";
 
-import { ProductShippingDetailsType } from "@/lib/types";
+import { CartProductType, ProductShippingDetailsType } from "@/lib/types";
 import { getMonthDay, getShippingDateRange } from "@/lib/utils";
 import ShippingFee from "./shipping-fee";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Size } from "@prisma/client";
+import QuantitySelector from "./quantity-selector";
 
 interface ShippingDetailsProps {
   shippingDetails: ProductShippingDetailsType;
   quantity: number;
   weight?: number | null;
   loading: boolean;
+  productId: string;
+  variantId: string;
+  sizeId: string | null;
+  stock: number;
+  handleChange: (property: keyof CartProductType, value: any) => void;
+  sizes: Size[];
 }
 
 export default function ShippingDetails({
@@ -19,6 +27,12 @@ export default function ShippingDetails({
   quantity,
   weight,
   loading,
+  productId,
+  variantId,
+  sizeId,
+  stock,
+  handleChange,
+  sizes,
 }: ShippingDetailsProps) {
   const [shippingTotal, setShippingTotal] = useState<number>();
 
@@ -63,10 +77,10 @@ export default function ShippingDetails({
 
   return (
     <Card className="w-full max-w-2xl">
-      <CardContent className="p-6">
+      <CardContent>
         <div className="space-y-4">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex w-full items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
                 <Truck className="h-5 w-5" />
@@ -84,7 +98,22 @@ export default function ShippingDetails({
                 </span>
               </div>
             </div>
+
             <ChevronRight className="h-5 w-5 text-gray-400" />
+
+            {sizeId && (
+              <div className="flex">
+                <QuantitySelector
+                  productId={productId}
+                  variantId={variantId}
+                  sizeId={sizeId}
+                  quantity={quantity}
+                  stock={stock}
+                  handleChange={handleChange}
+                  sizes={sizes}
+                />
+              </div>
+            )}
           </div>
 
           {/* Service Details */}
