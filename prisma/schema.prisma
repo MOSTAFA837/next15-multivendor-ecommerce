@@ -26,6 +26,7 @@ model User {
   accounts      Account[]
   stores    Store[]  @relation("UserStores")
   following Store[] @relation("UserFollowingStore")
+  reviews           Review[]          @relation("ReviewToUser")
  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -159,6 +160,7 @@ model Product {
   shippingFeeMethod ShippingFeeMethod @default(ITEM)
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @default(now()) @updatedAt
+  reviews       Review[]         @relation("ReviewToProduct")
 
   @@index([storeId])
   @@index([categoryId])
@@ -281,4 +283,24 @@ model ShippingRate {
 
   @@index([countryId])
   @@index([storeId])
+}
+
+model Review {
+  id       String @id @default(uuid())
+  variant  String
+  review   String
+  rating   Float
+  color    String
+  size     String
+  likes    Int    @default(0)
+  userId String
+  user   User   @relation("ReviewToUser", fields: [userId], references: [id])
+  productId String
+  product   Product @relation("ReviewToProduct", fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([userId])
+  @@index([productId])
 }

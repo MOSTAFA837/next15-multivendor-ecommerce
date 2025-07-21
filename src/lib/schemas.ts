@@ -347,3 +347,16 @@ export const ShippingRateFormSchema = z.object({
   deliveryTimeMax: z.number(),
   returnPolicy: z.string().min(1, "Return policy is required."),
 });
+
+export const AddReviewSchema = z.object({
+  variantName: z.string().optional().nullable(),
+  rating: z.number().min(1, "Please rate this product."),
+  size: z.string().min(1, "Please select a size."), // Ensures size cannot be empty
+  review: z
+    .string()
+    .min(
+      10,
+      "Your feedback matters! Please write a review of minimum 10 characters."
+    ), // Ensures review cannot be empty
+  color: z.string({ required_error: "Color is required." }),
+});

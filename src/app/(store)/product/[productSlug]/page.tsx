@@ -6,6 +6,8 @@ import RelatedProducts from "@/components/store/product-page/related-products";
 import Specifications from "@/components/store/product-page/specifications";
 import { Separator } from "@/components/ui/separator";
 import { retrieveProductDetailsOptimized } from "@/queries/product";
+import Reviews from "../../../../components/store/product-page/reviews";
+import StoreProducts from "@/components/store/product-page/store-products";
 
 interface ProductVariantPageProps {
   params: {
@@ -44,7 +46,22 @@ export default async function ProductVariantPage({
 
         <StoreCard store={store} />
 
+        <StoreProducts
+          storeUrl={product.store.url}
+          storeName={product.store.name}
+          count={5}
+        />
+
         <Separator />
+
+        <Separator className="mt-6" />
+
+        <Reviews
+          productId={product.id}
+          rating={product.rating}
+          variantsInfo={product.variants}
+          numReviews={product._count.reviews}
+        />
 
         {/* related products */}
         <RelatedProducts

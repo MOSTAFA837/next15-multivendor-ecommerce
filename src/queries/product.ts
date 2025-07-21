@@ -566,6 +566,9 @@ export const retrieveProductDetailsOptimized = async (productSlug: string) => {
       store: true,
       brand: true,
       shippingFeeMethod: true,
+      _count: {
+        select: { reviews: true },
+      },
       variants: {
         select: {
           id: true,
