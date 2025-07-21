@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 // import { saveUserCart } from "@/queries/user";
 import { PulseLoader } from "react-spinners";
 import { toast } from "@/hooks/use-toast";
+import { saveUserCart } from "@/queries/user";
 
 interface Props {
   cartItems: CartProductType[];
@@ -26,8 +27,8 @@ const CartSummary: FC<Props> = ({ cartItems, shippingFees }) => {
   const handleSaveCart = async () => {
     try {
       setLoading(true);
-      // const res = await saveUserCart(cartItems);
-      // if (res) router.push("/checkout");
+      const res = await saveUserCart(cartItems);
+      if (res) router.push("/checkout");
       setLoading(false);
     } catch (error: any) {
       toast({

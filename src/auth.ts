@@ -2,7 +2,7 @@ import NextAuth, { DefaultSession } from "next-auth";
 import authConfig from "./auth.config";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "./lib/db";
-import { Role } from "@prisma/client";
+import { Role, ShippingAddress } from "@prisma/client";
 
 export type ExtendedUser = DefaultSession["user"] & {
   role: Role;
@@ -27,6 +27,11 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         session.user.role = token.role as Role;
       }
 
+      // if (token.shippingAddresses && session.user) {
+      //   session.user.shippingAddresses =
+      //     token.shippingAddresses as ShippingAddress[];
+      // }
+
       return session;
     },
     async jwt({ token }) {
@@ -34,11 +39,15 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
       const existingUser = await db.user.findUnique({
         where: { id: token.sub },
+        // include: {
+        //   shippingAddresses: true,
+        // },
       });
 
       if (!existingUser) return token;
 
       token.role = existingUser.role;
+      // token.shippingAddresses = existingUser.shippingAddresses || [];
       return token;
     },
   },
