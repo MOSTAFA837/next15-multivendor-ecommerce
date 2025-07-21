@@ -1,3 +1,4 @@
+import StoreCard from "@/components/store/cards/store-card";
 import Descriptions from "@/components/store/product-page/descriptions";
 import ProductPageContainer from "@/components/store/product-page/info/container";
 import { Questions } from "@/components/store/product-page/questions";
@@ -37,6 +38,12 @@ export default async function ProductVariantPage({
         productData={product}
         variantSlug={searchParams.variant}
       >
+        <Separator className="mt-6" />
+
+        <div className="h-6" />
+
+        <StoreCard store={store} />
+
         <Separator />
 
         {/* related products */}
@@ -45,24 +52,6 @@ export default async function ProductVariantPage({
           categoryId={product.categoryId}
           subCategoryId={product.subCategoryId}
         />
-
-        <>
-          <Separator className="mt-6" />
-          {/* Product description */}
-          <Descriptions
-            text={[product.description, variant?.variantDescription || ""]}
-          />
-        </>
-
-        <Separator className="mt-6" />
-
-        {/* {(specs.product || specs.variant) && <Specifications specs={specs} />} */}
-
-        {/* <Separator className="mt-6" /> */}
-
-        {/* {product.questions && <Questions questions={product.questions} />} */}
-
-        <Separator className="mt-6" />
       </ProductPageContainer>
     </div>
   );
