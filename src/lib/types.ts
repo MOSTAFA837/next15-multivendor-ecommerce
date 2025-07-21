@@ -13,6 +13,7 @@ import {
   Cart,
   CartItem,
   Category,
+  Coupon,
   Prisma,
   ProductVariantImage,
   Review,
@@ -21,6 +22,7 @@ import {
   ShippingRate,
   Size,
   Spec,
+  Store,
   SubCategory,
   User,
 } from "@prisma/client";
@@ -244,6 +246,7 @@ export type SortOrder = "asc" | "desc";
 
 export type CartWithCartItemsType = Cart & {
   items: CartItem[];
+  coupon: (Coupon & { store: Store }) | null;
 };
 
 export type UserShippingAddressType = ShippingAddress & {

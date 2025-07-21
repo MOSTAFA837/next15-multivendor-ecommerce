@@ -8,12 +8,13 @@ import { signIn, signOut } from "@/auth";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { AuthError } from "next-auth";
 import { currentUser } from "@/lib/use-current-user";
-import { CartProductType } from "@/lib/types";
+import { CartProductType, CartWithCartItemsType } from "@/lib/types";
 import {
   getDeliveryDetailsForStoreByCountry,
+  getProductShippingFee,
   getShippingDetails,
 } from "./product";
-import { ShippingAddress } from "@prisma/client";
+import { CartItem, Country, ShippingAddress } from "@prisma/client";
 import { cookies } from "next/headers";
 
 export const login = async (values: z.infer<typeof loginSchema>) => {
@@ -789,4 +790,169 @@ export const checkIfAddedToWishlist = async (
 
   if (addedToWishlist) return true;
   return false;
+};
+
+export const updateCheckoutProductstWithLatest = async (
+  cartProducts: CartItem[]
+): Promise<CartWithCartItemsType> => {
+  // Fetch product, variant, and size data from the database for validation
+  const validatedCartItems = await Promise.all(
+    cartProducts.map(async (cartProduct) => {
+      const { productId, variantId, sizeId, quantity } = cartProduct;
+
+      // Fetch the product, variant, and size from the database
+      const product = await db.product.findUnique({
+        where: {
+          id: productId,
+        },
+        include: {
+          store: true,
+          variants: {
+            where: {
+              id: variantId,
+            },
+            include: {
+              sizes: {
+                where: {
+                  id: sizeId,
+                },
+              },
+              images: true,
+            },
+          },
+        },
+      });
+
+      if (
+        !product ||
+        product.variants.length === 0 ||
+        product.variants[0].sizes.length === 0
+      ) {
+        throw new Error(
+          `Invalid product, variant, or size combination for productId ${productId}, variantId ${variantId}, sizeId ${sizeId}`
+        );
+      }
+
+      const variant = product.variants[0];
+      const size = variant.sizes[0];
+
+      let shippingFee = 0;
+
+      const { shippingFeeMethod, store } = product;
+
+      const fee = await getProductShippingFee(
+        shippingFeeMethod,
+        store,
+        variant.weight ?? 0,
+        quantity
+      );
+
+      if (fee) {
+        shippingFee = fee;
+      }
+
+      const price = size.discount
+        ? size.price - (size.price * size.discount) / 100
+        : size.price;
+
+      const validated_qty = Math.min(quantity, size.quantity);
+
+      const totalPrice = price * validated_qty + shippingFee;
+
+      try {
+        const newCartItem = await db.cartItem.update({
+          where: {
+            id: cartProduct.id,
+          },
+          data: {
+            name: `${product.name} · ${variant.variantName}`,
+            image: variant.images[0].url,
+            price,
+            quantity: validated_qty,
+            shippingFee,
+            totalPrice,
+          },
+        });
+        return newCartItem;
+      } catch (error) {
+        return cartProduct;
+      }
+    })
+  );
+
+  // Apply coupon if exist
+  const cartCoupon = await db.cart.findUnique({
+    where: {
+      id: cartProducts[0].cartId,
+    },
+    select: {
+      coupon: {
+        include: {
+          store: true,
+        },
+      },
+    },
+  });
+  // Recalculate the cart's total price and shipping fees
+  const subTotal = validatedCartItems.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
+
+  const shippingFees = validatedCartItems.reduce(
+    (acc, item) => acc + item.shippingFee,
+    0
+  );
+
+  let total = subTotal + shippingFees;
+
+  // Apply coupon discount if applicable
+  if (cartCoupon?.coupon) {
+    const { coupon } = cartCoupon;
+
+    const currentDate = new Date();
+    const startDate = new Date(coupon.startDate);
+    const endDate = new Date(coupon.endDate);
+
+    if (currentDate > startDate && currentDate < endDate) {
+      // Check if the coupon applies to any store in the cart
+      const applicableStoreItems = validatedCartItems.filter(
+        (item) => item.storeId === coupon.storeId
+      );
+
+      if (applicableStoreItems.length > 0) {
+        // Calculate subtotal for the coupon's store (including shipping fees)
+        const storeSubTotal = applicableStoreItems.reduce(
+          (acc, item) => acc + item.price * item.quantity + item.shippingFee,
+          0
+        );
+        // Apply coupon discount to the store's subtotal
+        const discountedAmount = (storeSubTotal * coupon.discount) / 100;
+        total -= discountedAmount;
+      }
+    }
+  }
+
+  const cart = await db.cart.update({
+    where: {
+      id: cartProducts[0].cartId,
+    },
+    data: {
+      subTotal,
+      shippingFees,
+      total,
+    },
+    include: {
+      items: true,
+      coupon: {
+        include: {
+          store: true,
+        },
+      },
+    },
+  });
+
+  if (!cart) throw new Error("Somethign went wrong !");
+
+  return cart;
 };

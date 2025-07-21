@@ -12,7 +12,7 @@ import {
 } from "@/lib/types";
 import { currentUser } from "@/lib/use-current-user";
 import { generateUniqueSlug } from "@/lib/utils";
-import { Store } from "@prisma/client";
+import { Country, Store } from "@prisma/client";
 
 import slugify from "slugify";
 
@@ -881,4 +881,46 @@ export const getDeliveryDetailsForStoreByCountry = async (storeId: string) => {
     deliveryTimeMin,
     deliveryTimeMax,
   };
+};
+
+export const getProductShippingFee = async (
+  shippingFeeMethod: string,
+  store: Store,
+  weight: number,
+  quantity: number
+) => {
+  // Fetch shipping rate from the database for the given store and country
+  const shippingRate = await db.shippingRate.findFirst({
+    where: {
+      storeId: store.id,
+    },
+  });
+
+  // Destructure the shippingRate with defaults
+  const {
+    shippingFeePerItem = store.defaultShippingFeePerItem,
+    shippingFeeForAdditionalItem = store.defaultShippingFeeForAdditionalItem,
+    shippingFeePerKg = store.defaultShippingFeePerKg,
+    shippingFeeFixed = store.defaultShippingFeeFixed,
+  } = shippingRate || {};
+
+  // Calculate the additional quantity (excluding the first item)
+  const additionalItemsQty = quantity - 1;
+
+  // Define fee calculation methods in a map (using functions)
+  const feeCalculators: Record<string, () => number> = {
+    ITEM: () =>
+      shippingFeePerItem + shippingFeeForAdditionalItem * additionalItemsQty,
+    WEIGHT: () => shippingFeePerKg * weight * quantity,
+    FIXED: () => shippingFeeFixed,
+  };
+
+  // Check if the fee calculation method exists and calculate the fee
+  const calculateFee = feeCalculators[shippingFeeMethod];
+  if (calculateFee) {
+    return calculateFee(); // Execute the corresponding calculation
+  }
+
+  // If no valid shipping method is found, return 0
+  return 0;
 };
