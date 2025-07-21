@@ -1,6 +1,7 @@
 "use client";
 
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
+import { ProductVariantImage } from "@prisma/client";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import ImageZoom from "react-image-zooom";
@@ -17,10 +18,10 @@ export default function ProductSwiper({
   setActiveImage,
 }: ProductSwiperProps) {
   return (
-    <div className="relative swiper1700width">
-      <div className="relative w-full flex flex-col-reverse gap-2">
+    <div className="relative xl:w-[25vw] swiper1700width">
+      <div className="relative w-full flex flex-col-reverse 2xl:flex-row gap-2">
         {/* Thumbnails */}
-        {/* <div className="flex flex-wrap 2xl:flex-col gap-3">
+        <div className="flex flex-wrap 2xl:flex-col gap-3">
           {images.map((img) => (
             <div
               key={img.url}
@@ -43,21 +44,16 @@ export default function ProductSwiper({
               />
             </div>
           ))}
-        </div> */}
+        </div>
 
         {/* Image view */}
-        {images.map((i) => (
-          <div
-            className="relative rounded-lg overflow-hidden flex flex-grow "
-            key={i.url}
-          >
-            <ImageZoom
-              src={i.url}
-              zoom={200}
-              className="!w-full rounded-lg flex flex-grow h-fit"
-            />
-          </div>
-        ))}
+        <div className="relative rounded-lg overflow-hidden flex flex-grow ">
+          <ImageZoom
+            src={activeImage ? activeImage.url : ""}
+            zoom={200}
+            className="!w-full rounded-lg flex flex-grow h-fit"
+          />
+        </div>
       </div>
     </div>
   );

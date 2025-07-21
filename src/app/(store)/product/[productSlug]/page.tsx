@@ -1,5 +1,8 @@
+import Descriptions from "@/components/store/product-page/descriptions";
 import ProductPageContainer from "@/components/store/product-page/info/container";
+import { Questions } from "@/components/store/product-page/questions";
 import RelatedProducts from "@/components/store/product-page/related-products";
+import Specifications from "@/components/store/product-page/specifications";
 import { Separator } from "@/components/ui/separator";
 import { retrieveProductDetailsOptimized } from "@/queries/product";
 
@@ -18,11 +21,6 @@ export default async function ProductVariantPage({
 }: ProductVariantPageProps) {
   const product = await retrieveProductDetailsOptimized(params.productSlug);
   const variant = product.variants.find((v) => v.slug === searchParams.variant);
-
-  const specs = {
-    product: product.specs,
-    variant: variant?.specs,
-  };
 
   const store = {
     id: product.store.id,
@@ -47,6 +45,24 @@ export default async function ProductVariantPage({
           categoryId={product.categoryId}
           subCategoryId={product.subCategoryId}
         />
+
+        <>
+          <Separator className="mt-6" />
+          {/* Product description */}
+          <Descriptions
+            text={[product.description, variant?.variantDescription || ""]}
+          />
+        </>
+
+        <Separator className="mt-6" />
+
+        {/* {(specs.product || specs.variant) && <Specifications specs={specs} />} */}
+
+        {/* <Separator className="mt-6" /> */}
+
+        {/* {product.questions && <Questions questions={product.questions} />} */}
+
+        <Separator className="mt-6" />
       </ProductPageContainer>
     </div>
   );

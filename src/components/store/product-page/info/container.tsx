@@ -23,7 +23,7 @@ export default function ProductPageContainer({
   productData,
   variantSlug,
 }: ProductPageContainerProps) {
-  const { id, variants, slug } = productData;
+  const { id, variants, slug, specs, questions, description } = productData;
 
   const [variant, setVariant] = useState<ProductVariantDataType>(
     variants.find((v) => v.slug === variantSlug) || variants[0]
@@ -48,6 +48,7 @@ export default function ProductPageContainer({
     variantImage,
     weight,
     sizes,
+    variantDescription,
   } = variant;
 
   const [activeImage, setActiveImage] = useState<{ url: string } | null>(
@@ -126,6 +127,9 @@ export default function ProductPageContainer({
               handleChange={handleChange}
               sizes={sizes}
               isProductValid={isProductValid}
+              specs={{ product: specs, variant: variant.specs }}
+              questions={questions}
+              text={[description, variantDescription || ""]}
             />
           </div>
         </div>
