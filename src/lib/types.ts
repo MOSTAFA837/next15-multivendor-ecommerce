@@ -2,6 +2,7 @@ import {
   getAllStoreProducts,
   getProductPageData,
   getProducts,
+  getRatingStats,
   getShippingDetails,
   retrieveProductDetails,
   retrieveProductDetailsOptimized,
@@ -13,6 +14,7 @@ import {
   Prisma,
   ProductVariantImage,
   Review,
+  ShippingFeeMethod,
   ShippingRate,
   Size,
   Spec,
@@ -60,6 +62,7 @@ export type ProductWithVariantType = {
   questions: { id?: string; question: string; answer: string }[];
   offerTagId: string;
   weight: number | null;
+  shippingFeeMethod: ShippingFeeMethod;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -217,3 +220,21 @@ export type ReviewDetailsType = {
   variant: string;
   color: string;
 };
+
+export type RatingStatisticsType = Prisma.PromiseReturnType<
+  typeof getRatingStats
+>;
+
+export type ReviewsFiltersType = {
+  rating?: number;
+};
+
+export type ReviewsOrderType = {
+  orderBy: "latest" | "oldest" | "highest";
+};
+
+export type StatisticsCardType = Prisma.PromiseReturnType<
+  typeof getRatingStats
+>["ratingStats"];
+
+export type SortOrder = "asc" | "desc";

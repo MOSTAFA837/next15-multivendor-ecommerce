@@ -72,7 +72,7 @@ export const upsertReview = async (
       },
     });
 
-    // const statistics = await getRatingStatistics(productId);
+    const statistics = await getRatingStats(productId);
 
     const message = existingReview
       ? "Your review has been updated successfully!"
@@ -81,10 +81,49 @@ export const upsertReview = async (
     return {
       review: upsertedReview,
       rating: averageRating,
-      //   statistics,
+      statistics,
       message,
     };
   } catch (error) {
     throw error;
   }
+};
+
+// Helpers
+export const getRatingStats = async (productId: string) => {
+  const ratingStats = await db.review.groupBy({
+    by: ["rating"],
+    where: {
+      productId,
+    },
+    _count: {
+      rating: true,
+    },
+  });
+
+  const totalReviews = ratingStats.reduce(
+    (sum, stat) => sum + stat._count.rating,
+    0
+  );
+
+  const ratingCounts = Array(5).fill(0);
+
+  ratingStats.forEach((stat) => {
+    const rating = Math.floor(stat.rating);
+
+    if (rating >= 1 && rating <= 5) {
+      ratingCounts[rating - 1] = stat._count.rating;
+    }
+  });
+
+  console.log(ratingStats);
+
+  return {
+    ratingStats: ratingCounts.map((count, index) => ({
+      rating: index + 1,
+      numReviews: count,
+      percentage: (count / totalReviews) * 100,
+    })),
+    totalReviews,
+  };
 };
