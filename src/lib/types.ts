@@ -252,3 +252,5 @@ export type CartWithCartItemsType = Cart & {
 export type UserShippingAddressType = ShippingAddress & {
   user: User;
 };
+
+export type Theme = "light" | "dark" | "colored";
