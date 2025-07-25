@@ -27,6 +27,7 @@ import {
   User,
 } from "@prisma/client";
 import countries from "@/data/countries.json";
+import { getUserOrders } from "@/queries/profile";
 
 export interface DashboardSidebarMenuInterface {
   label: string;
@@ -253,4 +254,45 @@ export type UserShippingAddressType = ShippingAddress & {
   user: User;
 };
 
-export type Theme = "light" | "dark" | "colored";
+export type OrderTableFilter =
+  | ""
+  | "unpaid"
+  | "toShip"
+  | "shipped"
+  | "delivered";
+
+export type OrderTableDateFilter =
+  | ""
+  | "last-6-months"
+  | "last-1-year"
+  | "last-2-years";
+
+export enum OrderStatus {
+  Pending = "Pending",
+  Confirmed = "Confirmed",
+  Processing = "Processing",
+  Shipped = "Shipped",
+  OutforDelivery = "OutforDelivery",
+  Delivered = "Delivered",
+  Cancelled = "Cancelled",
+  Failed = "Failed",
+  Refunded = "Refunded",
+  Returned = "Returned",
+  PartiallyShipped = "PartiallyShipped",
+  OnHold = "OnHold",
+}
+
+export enum PaymentStatus {
+  Pending = "Pending",
+  Paid = "Paid",
+  Failed = "Failed",
+  Declined = "Declined",
+  Cancelled = "Cancelled",
+  Refunded = "Refunded",
+  PartiallyRefunded = "PartiallyRefunded",
+  Chargeback = "Chargeback",
+}
+
+export type UserOrderType = Prisma.PromiseReturnType<
+  typeof getUserOrders
+>["orders"][0];
