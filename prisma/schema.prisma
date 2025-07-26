@@ -32,6 +32,7 @@ model User {
   orders    Order[]  @relation("UserOrders")
   wishlist          Wishlist[]        @relation("WishlistToUser")
   coupons           Coupon[]           @relation("CouponToUser")
+  payments PaymentDetails[]  @relation("PaymentDetailsToUser")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -424,6 +425,7 @@ model Order {
   userId String
   user   User   @relation("UserOrders", fields: [userId], references: [id])
   groups OrderGroup[] @relation("OrderGroupToOrder")
+  paymentDetails PaymentDetails? @relation("PaymentDetailsToOrder")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -528,4 +530,22 @@ model Coupon {
   updatedAt DateTime @updatedAt
 
   @@index([storeId])
+}
+
+model PaymentDetails {
+  id String @id @default(uuid())
+  paymentInetntId String
+  paymentMethod String
+  status String
+  amount Float
+  currency String
+  orderId String @unique
+  order Order @relation("PaymentDetailsToOrder",fields: [orderId],references: [id],onDelete: Cascade) 
+  userId String
+  user User @relation("PaymentDetailsToUser",fields: [userId],references: [id],onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([userId])
 }
