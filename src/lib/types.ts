@@ -27,7 +27,11 @@ import {
   User,
 } from "@prisma/client";
 import countries from "@/data/countries.json";
-import { getUserOrders, getUserPayments } from "@/queries/profile";
+import {
+  getUserOrders,
+  getUserPayments,
+  getUserWishlist,
+} from "@/queries/profile";
 
 export interface DashboardSidebarMenuInterface {
   label: string;
@@ -316,3 +320,7 @@ export type ReviewDateFilter =
   | "last-2-years";
 
 export type ReviewFilter = "5" | "4" | "3" | "2" | "1" | "";
+
+export type ProductWishlistType = Prisma.PromiseReturnType<
+  typeof getUserWishlist
+>["wishlist"][0];
