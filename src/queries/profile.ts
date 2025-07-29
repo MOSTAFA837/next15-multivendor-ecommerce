@@ -6,6 +6,8 @@ import {
   OrderTableFilter,
   PaymentTableDateFilter,
   PaymentTableFilter,
+  ReviewDateFilter,
+  ReviewFilter,
 } from "@/lib/types";
 import { currentUser } from "@/lib/use-current-user";
 import { OrderStatus, PaymentStatus } from "@prisma/client";
@@ -197,6 +199,82 @@ export const getUserPayments = async (
   // Return paginated data with metadata
   return {
     payments,
+    totalPages,
+    currentPage: page,
+    pageSize,
+    totalCount,
+  };
+};
+
+export const getUserReviews = async (
+  filter: ReviewFilter = "",
+  period: ReviewDateFilter = "",
+  search = "" /* Search by Payment intent id */,
+  page: number = 1,
+  pageSize: number = 10
+) => {
+  // Retrieve current user
+  const user = await currentUser();
+
+  // Check if user is authenticated
+  if (!user) throw new Error("Unauthenticated.");
+
+  // Calculate pagination values
+  const skip = (page - 1) * pageSize;
+
+  // Construct the base query
+  const whereClause: any = {
+    AND: [
+      {
+        userId: user.id,
+      },
+    ],
+  };
+
+  // Apply filters
+  if (filter) whereClause.AND.push({ rating: parseFloat(filter) });
+
+  // Apply period filter
+  const now = new Date();
+  if (period === "last-6-months") {
+    whereClause.AND.push({
+      createdAt: { gte: subMonths(now, 6) },
+    });
+  }
+  if (period === "last-1-year")
+    whereClause.AND.push({ createdAt: { gte: subYears(now, 1) } });
+  if (period === "last-2-years")
+    whereClause.AND.push({ createdAt: { gte: subYears(now, 2) } });
+
+  // Apply search filter
+  if (search.trim()) {
+    whereClause.AND.push({
+      review: { contains: search }, // Search by review text
+    });
+  }
+
+  // Fetch reviews for the current page
+  const reviews = await db.review.findMany({
+    where: whereClause,
+    include: {
+      user: true,
+    },
+    take: pageSize, // Limit to page size
+    skip, // Skip the orders of previous pages
+    orderBy: {
+      updatedAt: "desc", // Sort by most updated recently
+    },
+  });
+
+  // Fetch total count of orders for the query
+  const totalCount = await db.review.count({ where: whereClause });
+
+  // Calculate total pages
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  // Return paginated data with metadata
+  return {
+    reviews,
     totalPages,
     currentPage: page,
     pageSize,
