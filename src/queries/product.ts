@@ -924,3 +924,94 @@ export const getProductShippingFee = async (
   // If no valid shipping method is found, return 0
   return 0;
 };
+
+export const getProductsByIds = async (
+  ids: string[],
+  page: number = 1,
+  pageSize: number = 10
+): Promise<{ products: any; totalPages: number }> => {
+  // Check if ids array is empty
+  if (!ids || ids.length === 0) {
+    throw new Error("Ids are undefined");
+  }
+
+  // Default values for page and pageSize
+  const currentPage = page;
+  const limit = pageSize;
+  const skip = (currentPage - 1) * limit;
+
+  try {
+    // Query the database for products with the specified ids
+    const variants = await db.productVariant.findMany({
+      where: {
+        id: {
+          in: ids, // Filter products whose idds are in the provided array
+        },
+      },
+      select: {
+        id: true,
+        variantName: true,
+        slug: true,
+        images: {
+          select: {
+            url: true,
+          },
+        },
+        sizes: true,
+        product: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            rating: true,
+            sales: true,
+          },
+        },
+      },
+      take: limit,
+      skip: skip,
+    });
+
+    const new_products = variants.map((variant) => ({
+      id: variant.product.id,
+      slug: variant.product.slug,
+      name: variant.product.name,
+      rating: variant.product.rating,
+      sales: variant.product.sales,
+      variants: [
+        {
+          variantId: variant.id,
+          variantName: variant.variantName,
+          variantSlug: variant.slug,
+          images: variant.images,
+          sizes: variant.sizes,
+        },
+      ],
+      variantImages: [],
+    }));
+
+    // Return products sorted in the order of ids provided
+    const ordered_products = ids
+      .map((id) =>
+        new_products.find((product) => product.variants[0].variantId === id)
+      )
+      .filter(Boolean); // Filter out undefined values
+
+    const allProducts = await db.productVariant.count({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+
+    const totalPages = Math.ceil(allProducts / pageSize);
+
+    return {
+      products: ordered_products,
+      totalPages,
+    };
+  } catch (error) {
+    throw new Error("Failed to fetch products. Please try again.");
+  }
+};

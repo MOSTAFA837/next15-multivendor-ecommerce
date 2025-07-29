@@ -9,7 +9,7 @@ import { ReactNode, useEffect, useMemo, useState } from "react";
 import ProductInfo from "./info";
 import ProductSwiper from "./swiper";
 import Actions from "../actions";
-import { isProductValidToAdd } from "@/lib/utils";
+import { isProductValidToAdd, updateProductHistory } from "@/lib/utils";
 import { useCartStore } from "@/cart/use-cart";
 import useFromStore from "@/hooks/use-from-store";
 
@@ -168,6 +168,9 @@ export default function ProductPageContainer({
       window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
+
+  // Add product to history
+  updateProductHistory(variantId);
 
   return (
     <div className="relative min-h-screen bg-gray-50">
