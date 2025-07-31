@@ -324,3 +324,20 @@ export type ReviewFilter = "5" | "4" | "3" | "2" | "1" | "";
 export type ProductWishlistType = Prisma.PromiseReturnType<
   typeof getUserWishlist
 >["wishlist"][0];
+
+// lib/filters.ts
+export type FiltersQueryType = {
+  search: string;
+  sort: string;
+  category: string[];
+  subCategory: string[];
+  offer: string[];
+  size: string[];
+  color: string[];
+  minPrice: number | null;
+  maxPrice: number | null;
+};
+
+export type CatgegoryWithSubsType = Category & {
+  subCategories: SubCategory[];
+};

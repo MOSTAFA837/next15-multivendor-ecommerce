@@ -72,12 +72,40 @@ export const upsertCategory = async (category: Category) => {
   }
 };
 
-export const getAllCategories = async () => {
+export const getAllCategories = async (storeUrl?: string) => {
+  let storeId: string | undefined;
+
+  if (storeUrl) {
+    // Retrieve the storeId based on the storeUrl
+    const store = await db.store.findUnique({
+      where: { url: storeUrl },
+    });
+
+    // If no store is found, return an empty array or handle as needed
+    if (!store) {
+      return [];
+    }
+
+    storeId = store.id;
+  }
+
+  // Retrieve all categories from the database
   const categories = await db.category.findMany({
+    where: storeId
+      ? {
+          products: {
+            some: {
+              storeId: storeId,
+            },
+          },
+        }
+      : {},
+    include: {
+      subCategories: true,
+    },
     orderBy: {
       updatedAt: "desc",
     },
-    include: { subCategories: true },
   });
 
   return categories;

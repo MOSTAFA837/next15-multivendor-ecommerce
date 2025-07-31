@@ -3,7 +3,7 @@ import { twMerge } from "tailwind-merge";
 import ColorThief from "colorthief";
 import { PrismaClient } from "@prisma/client";
 import { db } from "./db";
-import { CartProductType, Country } from "./types";
+import { CartProductType, Country, FiltersQuery } from "./types";
 import countries from "@/data/countries.json";
 import { differenceInDays, differenceInHours } from "date-fns";
 
@@ -260,3 +260,32 @@ export const updateProductHistory = (variantId: string) => {
   // Save updated history to localStorage
   localStorage.setItem("productHistory", JSON.stringify(productHistory));
 };
+
+// lib/filters.ts
+type RawSP = { [key: string]: string | string[] | undefined };
+
+const asArray = (v: string | string[] | undefined) =>
+  Array.isArray(v) ? v.filter(Boolean) : v ? [v] : [];
+
+const asString = (v: string | string[] | undefined) =>
+  (Array.isArray(v) ? v[0] : v) ?? "";
+
+const asNumber = (v: string | string[] | undefined): number | null => {
+  const s = Array.isArray(v) ? v[0] : v;
+  const n = s != null && s.trim() !== "" ? Number(s) : NaN;
+  return Number.isFinite(n) ? n : null;
+};
+
+export function normalizeSearchParams(sp: RawSP): FiltersQuery {
+  return {
+    search: asString(sp.search),
+    sort: asString(sp.sort),
+    category: asArray(sp.category).sort(),
+    subCategory: asArray(sp.subCategory).sort(),
+    offer: asArray(sp.offer).sort(),
+    size: asArray(sp.size).sort(),
+    color: asArray(sp.color).sort(),
+    minPrice: asNumber(sp.minPrice),
+    maxPrice: asNumber(sp.maxPrice),
+  };
+}
