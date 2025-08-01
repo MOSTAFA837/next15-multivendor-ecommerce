@@ -2,6 +2,7 @@ import ProductFilters from "@/components/store/browse/filters";
 import ProductCard from "@/components/store/cards/product/product-card";
 import { FiltersQueryType } from "@/lib/types";
 import { getProducts } from "@/queries/product";
+import { getFilteredSizes } from "@/queries/size";
 
 export default async function BrowsePage({
   searchParams,
@@ -13,11 +14,11 @@ export default async function BrowsePage({
     offer,
     search,
     size,
-    sort,
+    // sort,
     subCategory,
-    maxPrice,
-    minPrice,
-    color,
+    // maxPrice,
+    // minPrice,
+    // color,
   } = searchParams;
   const products_data = await getProducts({
     search,
@@ -27,6 +28,7 @@ export default async function BrowsePage({
     size: Array.isArray(size) ? size : size ? [size] : undefined,
   });
 
+  await getFilteredSizes({});
   const { products } = products_data;
 
   return (
