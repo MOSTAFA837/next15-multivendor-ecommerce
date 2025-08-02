@@ -2,7 +2,10 @@
 
 import { db } from "@/lib/db";
 
-// Retrieves all sizes that exist in a product based on the filters (category, subCategory, offer).
+// Function: getFilteredSizes
+// Description: Retrieves all sizes that exist in a product based on the filters (category, subCategory, offer).
+// Permission Level: Public
+// Params: filters - an object containing category, subCategory, and offer as URLs.
 // Returns: Array of sizes in the form {id: string, size: string}[].
 export const getFilteredSizes = async (
   filters: {

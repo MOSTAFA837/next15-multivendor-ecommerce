@@ -1,48 +1,80 @@
 "use client";
+
 import { FiltersQueryType } from "@/lib/types";
 import { X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-export default function FiltersHeader({
-  queries,
-}: {
-  queries: FiltersQueryType;
-}) {
+type RawQueries = FiltersQueryType | Promise<any> | string;
+
+function normalizeFilters(input: any): FiltersQueryType {
+  if (!input) return {} as FiltersQueryType;
+  if (typeof input === "string") {
+    try {
+      return JSON.parse(input);
+    } catch {
+      return {} as FiltersQueryType;
+    }
+  }
+  return input as FiltersQueryType;
+}
+
+export default function FiltersHeader({ queries }: { queries: RawQueries }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
 
+  const [resolvedQueries, setResolvedQueries] = useState<FiltersQueryType>(
+    {} as FiltersQueryType
+  );
   const [currentParams, setCurrentParams] = useState<string>(
     searchParams.toString()
   );
 
+  // Resolve potentially async / stringified queries
   useEffect(() => {
-    // Update currentParams whenever the searchParams change in the URL
+    let cancelled = false;
+    Promise.resolve(queries)
+      .then((q) => {
+        if (cancelled) return;
+        setResolvedQueries(normalizeFilters(q));
+      })
+      .catch((err) => {
+        console.error("Failed to resolve queries:", err);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [queries]);
+
+  // Sync currentParams when URL changes
+  useEffect(() => {
     setCurrentParams(searchParams.toString());
   }, [searchParams]);
 
-  // Destructure queries into an array format
-  const queriesArray = Object.entries(queries);
-  const queriesLength = queriesArray.reduce((count, [queryKey, queryValue]) => {
-    if (queryKey === "sort") return count; // Exclude sort from the count
-    if (queryKey === "search" && queryValue === "") return count; // Exclude empty search from count
-    return count + (Array.isArray(queryValue) ? queryValue.length : 1); // Count array lengths or single values
-  }, 0);
+  // Memoized entries and derived counts
+  const queriesArray = useMemo(
+    () => Object.entries(resolvedQueries),
+    [resolvedQueries]
+  );
 
-  // Handle Clearing all parameters
+  const queriesLength = useMemo(() => {
+    return queriesArray.reduce((count, [queryKey, queryValue]) => {
+      if (queryKey === "sort") return count; // Exclude sort from the count
+      if (queryKey === "search" && queryValue === "") return count; // Exclude empty search
+      if (Array.isArray(queryValue)) {
+        return count + queryValue.length;
+      }
+      return count + 1;
+    }, 0);
+  }, [queriesArray]);
+
+  // Clear all filters
   const handleClearQueries = () => {
-    const params = new URLSearchParams(searchParams);
-
-    params.forEach((_, key) => {
-      params.delete(key);
-    });
-
-    // Replace the URL with the pathname and no query string
     replace(pathname);
   };
 
-  // Handle removing specific query values or entire queries
+  // Remove specific query or value
   const handleRemoveQuery = (
     query: string,
     array?: string[],
@@ -51,20 +83,17 @@ export default function FiltersHeader({
     const params = new URLSearchParams(searchParams);
 
     if (specificValue && array) {
-      // Remove the specific value from the array and update the params
-      const updatedArray = array.filter((value) => value !== specificValue);
-      params.delete(query); // Remove the query from params
-      // Re-add remaining values if any
-      updatedArray.forEach((value) => params.append(query, value));
+      const updatedArray = array.filter((v) => v !== specificValue);
+      params.delete(query);
+      updatedArray.forEach((v) => params.append(query, v));
     } else {
-      // Remove the entire query
       params.delete(query);
     }
 
-    // Replace the URL with updated params
     replace(`${pathname}?${params.toString()}`);
-    setCurrentParams(params.toString()); // Trigger re-render with updated params
+    setCurrentParams(params.toString());
   };
+
   return (
     <div className="pt-2.5 pb-5">
       <div className="flex items-center justify-between h-4 leading-5">
@@ -72,36 +101,41 @@ export default function FiltersHeader({
         {queriesLength > 0 && (
           <div
             className="text-xs text-orange-background cursor-pointer hover:underline"
-            onClick={() => handleClearQueries()}
+            onClick={handleClearQueries}
           >
             Clear All
           </div>
         )}
       </div>
+
       {/* Display filters */}
       <div className="mt-3 flex flex-wrap gap-2">
         {queriesArray.map(([queryKey, queryValue]) => {
           if (queryKey === "sort") return null;
           if (queryKey === "search" && queryValue === "") return null;
+
           const isArrayQuery = Array.isArray(queryValue);
-          const queryValues = isArrayQuery ? queryValue : [queryValue];
+          const queryValues = isArrayQuery
+            ? (queryValue as string[])
+            : [queryValue as string];
 
           return (
             <div key={queryKey} className="flex flex-wrap gap-2">
               {queryValues.map((value, index) => (
                 <div
                   key={index}
-                  className="border cursor-pointer py-0.5 px-1.5 rounded-sm text-sm w-fit text-center"
+                  className="border cursor-pointer py-0.5 px-1.5 rounded-sm text-sm w-fit text-center flex items-center gap-1"
                 >
-                  <span className="text-main-secondary overflow-hidden text-ellipsis whitespace-nowrap mr-2">
+                  <span className="text-main-secondary overflow-hidden text-ellipsis whitespace-nowrap">
                     {value}
                   </span>
                   <X
-                    className="w-3 text-main-secondary hover:text-black cursor-pointer inline-block"
+                    className="w-3 text-main-secondary hover:text-black cursor-pointer"
                     onClick={() => {
+                      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
                       isArrayQuery
-                        ? handleRemoveQuery(queryKey, queryValues, value) // Remove specific value from array query
-                        : handleRemoveQuery(queryKey); // Remove entire query
+                        ? handleRemoveQuery(queryKey, queryValues, value)
+                        : handleRemoveQuery(queryKey);
                     }}
                   />
                 </div>
