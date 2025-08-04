@@ -532,6 +532,8 @@ export const getProducts = async (
       orderBy = { views: "desc" };
   }
 
+  console.log("orderBy", orderBy);
+
   // Get all filtered, sorted products
   const products = await db.product.findMany({
     where: wherClause,
@@ -576,6 +578,10 @@ export const getProducts = async (
     } else if (sortBy === "price-high-to-low") {
       return minPriceB - minPriceA; // Descending order
     }
+
+    console.log(minPriceA);
+    console.log(minPriceB);
+    console.log(sortBy);
 
     // If no price sort option is provided, return 0 (no sorting by price)
     return 0;

@@ -1,4 +1,5 @@
 import ProductFilters from "@/components/store/browse/filters";
+import ProductSort from "@/components/store/browse/sort";
 import ProductCard from "@/components/store/cards/product/product-card";
 import { FiltersQueryType } from "@/lib/types";
 import { getProducts } from "@/queries/product";
@@ -14,7 +15,7 @@ export default async function BrowsePage({
     offer,
     search,
     size,
-    // sort,
+    sort,
     subCategory,
     // maxPrice,
     // minPrice,
@@ -25,6 +26,7 @@ export default async function BrowsePage({
     category,
     subCategory,
     offer,
+    sort,
     size: Array.isArray(size) ? size : size ? [size] : undefined,
   });
 
@@ -41,7 +43,7 @@ export default async function BrowsePage({
       <div className="ml-[190px] md:ml-[220px] pt-[140px] lg:pt-20">
         {/* Sort Section */}
         <div className="sticky top-[64px] z-10 px-4 py-2 flex items-center">
-          {/* <ProductSort /> */}
+          <ProductSort />
         </div>
 
         {/* Product List */}
