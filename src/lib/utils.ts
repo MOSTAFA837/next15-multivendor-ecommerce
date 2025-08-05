@@ -3,7 +3,7 @@ import { twMerge } from "tailwind-merge";
 import ColorThief from "colorthief";
 import { PrismaClient } from "@prisma/client";
 import { db } from "./db";
-import { CartProductType, Country, FiltersQuery } from "./types";
+import { CartProductType, Country } from "./types";
 import countries from "@/data/countries.json";
 import { differenceInDays, differenceInHours } from "date-fns";
 
@@ -276,16 +276,25 @@ const asNumber = (v: string | string[] | undefined): number | null => {
   return Number.isFinite(n) ? n : null;
 };
 
-export function normalizeSearchParams(sp: RawSP): FiltersQuery {
+export const getShippingDatesRange = (
+  minDays: number,
+  maxDays: number,
+  date?: Date
+): { minDate: string; maxDate: string } => {
+  // Get the current date
+  const currentDate = date ? new Date(date) : new Date();
+
+  // Calculate minDate by adding minDays to current date
+  const minDate = new Date(currentDate);
+  minDate.setDate(currentDate.getDate() + minDays);
+
+  // Calculate maxDate by adding maxDays to current date
+  const maxDate = new Date(currentDate);
+  maxDate.setDate(currentDate.getDate() + maxDays);
+
+  // Return an object containing minDate and maxDate
   return {
-    search: asString(sp.search),
-    sort: asString(sp.sort),
-    category: asArray(sp.category).sort(),
-    subCategory: asArray(sp.subCategory).sort(),
-    offer: asArray(sp.offer).sort(),
-    size: asArray(sp.size).sort(),
-    color: asArray(sp.color).sort(),
-    minPrice: asNumber(sp.minPrice),
-    maxPrice: asNumber(sp.maxPrice),
+    minDate: minDate.toDateString(),
+    maxDate: maxDate.toDateString(),
   };
-}
+};

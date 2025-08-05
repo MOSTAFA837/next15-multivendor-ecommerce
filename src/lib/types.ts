@@ -7,7 +7,10 @@ import {
   retrieveProductDetails,
   retrieveProductDetailsOptimized,
 } from "@/queries/product";
-import { getStoreDefaultShippingDetails } from "@/queries/store";
+import {
+  getStoreDefaultShippingDetails,
+  getStoreOrders,
+} from "@/queries/store";
 import { getAllSubCategories } from "@/queries/sub-category";
 import {
   Cart,
@@ -341,3 +344,29 @@ export type FiltersQueryType = {
 export type CatgegoryWithSubsType = Category & {
   subCategories: SubCategory[];
 };
+
+export type ProductSize = {
+  size: string;
+  price: number;
+  discount: number;
+  quantity: number;
+};
+
+export type StoreOrderType = Prisma.PromiseReturnType<typeof getStoreOrders>[0];
+
+export enum ProductStatus {
+  Pending = "Pending",
+  Processing = "Processing",
+  ReadyForShipment = "ReadyForShipment",
+  Shipped = "Shipped",
+  Delivered = "Delivered",
+  Canceled = "Canceled",
+  Returned = "Returned",
+  Refunded = "Refunded",
+  FailedDelivery = "FailedDelivery",
+  OnHold = "OnHold",
+  Backordered = "Backordered",
+  PartiallyShipped = "PartiallyShipped",
+  ExchangeRequested = "ExchangeRequested",
+  AwaitingPickup = "AwaitingPickup",
+}
