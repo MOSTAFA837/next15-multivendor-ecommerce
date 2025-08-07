@@ -2,7 +2,7 @@ import { CartProductType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { FC, useEffect, useState } from "react";
 
-interface SimplifiedSize {
+export interface SimplifiedSize {
   id: string;
   size: string;
   quantity: number;

@@ -35,6 +35,7 @@ import {
   getUserPayments,
   getUserWishlist,
 } from "@/queries/profile";
+import { getHomeFeaturedCategories } from "@/queries/home";
 
 export interface DashboardSidebarMenuInterface {
   label: string;
@@ -370,3 +371,42 @@ export enum ProductStatus {
   ExchangeRequested = "ExchangeRequested",
   AwaitingPickup = "AwaitingPickup",
 }
+
+export type SimpleProduct = {
+  name: string;
+  slug: string;
+  variantName: string;
+  variantSlug: string;
+  price: number;
+  image: string;
+};
+
+export type ProductSimpleVariantType = {
+  variantId: string;
+  variantSlug: string;
+  variantName: string;
+  variantImage: string;
+  images: ProductVariantImage[];
+  sizes: Size[];
+};
+
+export type ProductWithVariants = {
+  id: string;
+  slug: string;
+  name: string;
+  rating: number;
+  sales: number;
+  numReviews: number;
+  variants: {
+    id: string;
+    variantName: string | null;
+    variantImage: string | null;
+    slug: string;
+    sizes: Size[];
+    images: ProductVariantImage[];
+  }[];
+};
+
+export type FeaturedCategoryType = Prisma.PromiseReturnType<
+  typeof getHomeFeaturedCategories
+>[0];

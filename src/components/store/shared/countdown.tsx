@@ -5,7 +5,7 @@ import { SimplifiedSize } from "../product-page/info/price";
 interface CountdownProps {
   targetDate: string;
   sizeId?: string;
-  sizes: SimplifiedSize[];
+  sizes?: SimplifiedSize[];
 }
 
 export default function Countdown({
